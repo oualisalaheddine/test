@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="fr">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Pont Bascule</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <!-- FontAwesome pour les icônes -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <style>
+        .sidebar {
+            height: 100vh;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 250px;
+            background-color: #f8f9fa;
+            padding-top: 20px;
+            overflow-y: auto;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+        }
+        .sidebar a {
+            display: block;
+            padding: 10px 20px;
+            text-decoration: none;
+            color: #333;
+            transition: background-color 0.3s;
+        }
+        .sidebar a:hover {
+            background-color: #e9ecef;
+        }
+        .resizer {
+            position: fixed;
+            top: 0;
+            left: 250px;
+            width: 5px;
+            height: 100vh;
+            background-color: #ccc;
+            cursor: col-resize;
+            z-index: 1000;
+        }
+        .resizer:hover {
+            background-color: #999;
+        }
+        .content {
+            margin-left: 255px;
+            padding: 20px;
+            height: 100vh;
+            overflow-y: auto;
+        }
+        .card-body {
+            max-height: 70vh;
+            overflow-y: auto;
+        }
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 100%;
+                height: auto;
+                position: relative;
+            }
+            .resizer {
+                display: none;
+            }
+            .content {
+                margin-left: 0;
+                height: auto;
+                overflow-y: visible;
+            }
+            .card-body {
+                max-height: none;
+                overflow-y: visible;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Sidebar Menu -->
+<div class="sidebar" id="sidebar">
+    <h4 class="text-center mb-4">Menu</h4>
+    <a href="#produits"><i class="fas fa-box"></i> Produits</a>
+    <a href="#partenaires"><i class="fas fa-handshake"></i> Partenaires</a>
+    <a href="#operations"><i class="fas fa-cogs"></i> Opérations</a>
+</div>
+
+<!-- Resizer pour redimensionner le sidebar -->
+<div class="resizer" id="resizer"></div>
+
+<!-- Main Content -->
+<div class="content">
+    <h1 class="mb-4">Pont Bascule</h1>
+
+    <!-- Section Produits -->
+    <div id="produits" class="section">
+        <div class="card mb-4">
+            <div class="card-header bg-primary text-white">
+                <h2 class="card-title mb-0"><i class="fas fa-box"></i> Produits</h2>
+            </div>
+            <div class="card-body">
+                <a th:href="@{/pontbascule/produits/nouveau}" class="btn btn-success mb-3">
+                    <i class="fas fa-plus"></i> Nouveau produit
+                </a>
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>ID</th>
+                                <th>Désignation</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="p : ${produits}">
+                                <td th:text="${p.idProduit}"></td>
+                                <td th:text="${p.designationProduit}"></td>
+                                <td>
+                                    <a th:href="@{'/pontbascule/produits/' + ${p.idProduit} + '/modifier'}" class="btn btn-warning btn-sm me-2">
+                                        <i class="fas fa-edit"></i> Modifier
+                                    </a>
+                                    <form th:action="@{'/pontbascule/produits/' + ${p.idProduit} + '/supprimer'}" method="post" style="display:inline;">
+                                        <input type="hidden" name="_method" value="delete" />
+                                        <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Êtes-vous sûr de vouloir supprimer ce produit ?');">
+                                            <i class="fas fa-trash"></i> Supprimer
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Section Partenaires -->
+    <div id="partenaires" class="section">
+        <div class="card mb-4">
+            <div class="card-header bg-info text-white">
+                <h2 class="card-title mb-0"><i class="fas fa-handshake"></i> Partenaires</h2>
+            </div>
+            <div class="card-body">
+                <a th:href="@{/pontbascule/partenaires/nouveau}" class="btn btn-success mb-3">
+                    <i class="fas fa-plus"></i> Nouveau partenaire
+                </a>
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>ID</th>
+                                <th>Raison sociale</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="pt : ${partenaires}">
+                                <td th:text="${pt.id}"></td>
+                                <td th:text="${pt.raisonSociale}"></td>
+                                <td>
+                                    <a th:href="@{'/pontbascule/partenaires/' + ${pt.id} + '/modifier'}" class="btn btn-warning btn-sm me-2">
+                                        <i class="fas fa-edit"></i> Modifier
+                                    </a>
+                                    <form th:action="@{'/pontbascule/partenaires/' + ${pt.id}}" method="post" style="display:inline;">
+                                        <input type="hidden" name="_method" value="delete" />
+                                        <button type="submit" class="btn btn-primary btn-sm me-2">
+                                            <i class="fas fa-save"></i> Enregistrer
+                                        </button>
+                                    </form>
+                                    <form th:action="@{'/pontbascule/partenaires/' + ${pt.id} + '/supprimer'}" method="post" style="display:inline;">
+                                        <input type="hidden" name="_method" value="delete" />
+                                        <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Êtes-vous sûr de vouloir supprimer ce partenaire ?');">
+                                            <i class="fas fa-trash"></i> Supprimer
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Section Opérations -->
+    <div id="operations" class="section">
+        <div class="card mb-4">
+            <div class="card-header bg-secondary text-white">
+                <h2 class="card-title mb-0"><i class="fas fa-cogs"></i> Opérations</h2>
+            </div>
+            <div class="card-body">
+                <a th:href="@{/pontbascule/operations/nouveau}" class="btn btn-success mb-3">
+                    <i class="fas fa-plus"></i> Nouvelle opération
+                </a>
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>ID</th>
+                                <th>Date</th>
+                                <th>Heure</th>
+                                <th>Produit</th>
+                                <th>Partenaire</th>
+                                <th>Type</th>
+                                <th>Immat</th>
+                                <th>P1</th>
+                                <th>P2</th>
+                                <th>Net</th>
+                                <th>Qté</th>
+                                <th>Écart</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                  
+                                
+                                
+                                 <tr th:each="op : ${operations}">
+        <td th:text="${op.id}"></td>
+        <td th:text="${op.dateOperation}"></td>
+        <td th:text="${op.heureOperation}"></td>
+        <td th:text="${op.produit != null ? op.produit.designationProduit : ''}"></td>
+        <td th:text="${op.partenaire != null ? op.partenaire.raisonSociale : ''}"></td>
+        <td th:text="${op.typeOperation != null ? op.typeOperation.libelle : ''}"></td>
+        <td th:text="${op.immatriculation}"></td>
+        <td th:text="${op.peser1}"></td>
+        <td th:text="${op.peser2}"></td>
+        <td th:text="${op.poidsNet}"></td>
+        <td th:text="${op.qteDeclare}"></td>
+        <td th:text="${op.ecart}"></td>
+        <td>
+                                
+                                
+                                
+                                    <a th:href="@{'/pontbascule/operations/' + ${op.id} + '/modifier'}" class="btn btn-warning btn-sm me-2">
+                                        <i class="fas fa-edit"></i> Modifier
+                                    </a>
+                                    <form th:action="@{'/pontbascule/operations/' + ${op.id} + '/supprimer'}" method="post" style="display:inline;">
+                                        <input type="hidden" name="_method" value="delete" />
+                                        <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Êtes-vous sûr de vouloir supprimer cette opération ?');">
+                                            <i class="fas fa-trash"></i> Supprimer
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // Scroll vers les sections
+    document.querySelectorAll('.sidebar a').forEach(link => {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            const target = this.getAttribute('href').substring(1);
+            document.getElementById(target).scrollIntoView({ behavior: 'smooth' });
+        });
+    });
+
+    // Resize du sidebar
+    const sidebar = document.getElementById('sidebar');
+    const resizer = document.getElementById('resizer');
+    const main = document.querySelector('.content');
+
+    let isResizing = false;
+
+    resizer.addEventListener('mousedown', e => {
+        isResizing = true;
+    });
+
+    document.addEventListener('mousemove', e => {
+        if (isResizing) {
+            const newWidth = sidebar.clientWidth + e.movementX;
+            if (newWidth >= 200 && newWidth <= 500) {
+                sidebar.style.width = newWidth + 'px';
+                main.style.marginLeft = (newWidth + 5) + 'px';
+            }
+        }
+    });
+
+    document.addEventListener('mouseup', e => isResizing = false);
+</script>
+
+</body>
+</html>

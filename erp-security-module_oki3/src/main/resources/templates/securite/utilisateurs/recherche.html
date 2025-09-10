@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <title>Recherche d'Utilisateurs</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        .dashboard-header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 2rem 0; margin-bottom: 2rem; }
+        .user-card { transition: transform 0.2s; }
+        .user-card:hover { transform: translateY(-2px); }
+        .user-avatar { width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(45deg, #007bff, #0056b3); display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; }
+        .search-info { background: #e9ecef; padding: 15px; border-radius: 6px; margin-bottom: 20px; }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <div class="dashboard-header">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h1 class="mb-0"><i class="fas fa-search me-3"></i>Recherche d'Utilisateurs</h1>
+                    <p class="mb-0 mt-2">Recherche avancée dans la base des utilisateurs</p>
+                </div>
+                <div class="col-md-4 text-end">
+                    <a th:href="@{/securite/utilisateurs}" class="btn btn-light">
+                        <i class="fas fa-arrow-left me-2"></i>Retour à la liste
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container-fluid">
+        <!-- Messages -->
+        <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="fas fa-check-circle me-2"></i>
+            <span th:text="${successMessage}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-circle me-2"></i>
+            <span th:text="${errorMessage}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+
+        <!-- Informations de recherche -->
+        <div class="search-info">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <p class="mb-0"><strong>Recherche:</strong> "<span th:text="${recherche}"></span>"</p>
+                </div>
+                <div class="col-md-6">
+                    <p class="mb-0"><strong>Résultats trouvés:</strong> <span th:text="${nombreResultats}"></span> utilisateur(s)</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Actions et nouvelle recherche -->
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <a th:href="@{/securite/utilisateurs}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left me-2"></i>Retour à la liste
+                </a>
+                <a th:href="@{/securite/utilisateurs/nouveau}" class="btn btn-primary ms-2">
+                    <i class="fas fa-user-plus me-2"></i>Nouvel Utilisateur
+                </a>
+            </div>
+            <div class="col-md-6">
+                <form th:action="@{/securite/utilisateurs/recherche}" method="get">
+                    <div class="input-group">
+                        <input type="text" name="q" class="form-control" th:value="${recherche}" placeholder="Rechercher un utilisateur..." />
+                        <button type="submit" class="btn btn-outline-primary">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Résultats de recherche -->
+        <div th:if="${!utilisateurs.empty}" class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-list me-2"></i>Résultats de la Recherche</h5>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th><i class="fas fa-hashtag me-1"></i>ID</th>
+                                <th><i class="fas fa-user me-1"></i>Utilisateur</th>
+                                <th><i class="fas fa-id-card me-1"></i>Nom Complet</th>
+                                <th><i class="fas fa-envelope me-1"></i>Email</th>
+                                <th><i class="fas fa-calendar me-1"></i>Date Création</th>
+                                <th><i class="fas fa-sign-in-alt me-1"></i>Dernière Connexion</th>
+                                <th><i class="fas fa-toggle-on me-1"></i>Statut</th>
+                                <th><i class="fas fa-cogs me-1"></i>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="u : ${utilisateurs}">
+                                <td>
+                                    <span class="badge bg-secondary" th:text="${u.id}"></span>
+                                </td>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <div class="user-avatar me-3" th:text="${#strings.substring(u.nom, 0, 1) + #strings.substring(u.prenom, 0, 1)}"></div>
+                                        <div>
+                                            <strong th:text="${u.username}"></strong>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <strong th:text="${u.nom + ' ' + u.prenom}"></strong>
+                                </td>
+                                <td>
+                                    <i class="fas fa-envelope me-1 text-muted"></i>
+                                    <span th:text="${u.email}"></span>
+                                </td>
+                                <td>
+                                    <i class="fas fa-calendar me-1 text-muted"></i>
+                                    <span th:text="${#temporals.format(u.dateCreation, 'dd/MM/yyyy')}"></span>
+                                </td>
+                                <td>
+                                    <i class="fas fa-sign-in-alt me-1 text-muted"></i>
+                                    <span th:text="${u.derniereConnexion != null ? #temporals.format(u.derniereConnexion, 'dd/MM/yyyy HH:mm') : 'Jamais'}"></span>
+                                </td>
+                                <td>
+                                    <span th:if="${u.compteActif}" class="badge bg-success">
+                                        <i class="fas fa-check me-1"></i>Actif
+                                    </span>
+                                    <span th:unless="${u.compteActif}" class="badge bg-danger">
+                                        <i class="fas fa-times me-1"></i>Inactif
+                                    </span>
+                                </td>
+                                <td>
+                                    <div class="btn-group" role="group">
+                                        <a th:href="@{'/securite/utilisateurs/' + ${u.id}}" class="btn btn-sm btn-outline-primary" title="Voir les détails">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        <a th:href="@{'/securite/utilisateurs/' + ${u.id} + '/modifier'}" class="btn btn-sm btn-outline-warning" title="Modifier">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <a th:href="@{'/securite/utilisateurs/' + ${u.id} + '/roles'}" class="btn btn-sm btn-outline-info" title="Gérer les rôles">
+                                            <i class="fas fa-key"></i>
+                                        </a>
+                                        <form th:action="@{'/securite/utilisateurs/' + ${u.id} + '/supprimer'}" method="post" style="display:inline-block;">
+                                            <button type="submit" class="btn btn-sm btn-outline-danger" title="Supprimer"
+                                                    onclick="return confirm('Êtes-vous sûr de vouloir supprimer cet utilisateur ?')">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Message si aucun résultat -->
+        <div th:if="${utilisateurs.empty}" class="text-center py-5">
+            <i class="fas fa-search fa-4x text-muted mb-3"></i>
+            <h4 class="text-muted">Aucun utilisateur trouvé</h4>
+            <p class="text-muted">Aucun utilisateur ne correspond à votre recherche "<span th:text="${recherche}"></span>".</p>
+            <p class="text-muted">Essayez avec d'autres termes de recherche ou créez un nouvel utilisateur.</p>
+            <div class="mt-3">
+                <a th:href="@{/securite/utilisateurs}" class="btn btn-secondary me-2">
+                    <i class="fas fa-arrow-left me-2"></i>Retour à la liste
+                </a>
+                <a th:href="@{/securite/utilisateurs/nouveau}" class="btn btn-primary">
+                    <i class="fas fa-user-plus me-2"></i>Créer un Utilisateur
+                </a>
+            </div>
+        </div>
+
+        <!-- Navigation -->
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="d-flex justify-content-between">
+                    <a th:href="@{/securite/utilisateurs}" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left me-2"></i>Retour à la liste
+                    </a>
+                    <div>
+                        <a th:href="@{/securite/roles}" class="btn btn-outline-primary">
+                            <i class="fas fa-key me-2"></i>Gérer les Rôles
+                        </a>
+                        <a th:href="@{/securite/permissions}" class="btn btn-outline-success">
+                            <i class="fas fa-shield-alt me-2"></i>Gérer les Permissions
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

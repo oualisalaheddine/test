@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <title th:text="${titre}">Permission</title>
+    <link rel="stylesheet" th:href="@{/css/styles.css}" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        .form-container { max-width: 800px; margin: 0 auto; padding: 20px; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; }
+        input[type="text"], input[type="email"], textarea, select { 
+            width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; 
+        }
+        textarea { height: 80px; resize: vertical; }
+        .btn { padding: 10px 20px; margin: 5px; text-decoration: none; border-radius: 4px; display: inline-block; border: none; cursor: pointer; }
+        .btn-primary { background-color: #007bff; color: white; }
+        .btn-secondary { background-color: #6c757d; color: white; }
+        .alert { padding: 10px; margin: 10px 0; border-radius: 4px; }
+        .alert-danger { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .form-row { display: flex; gap: 15px; }
+        .form-row .form-group { flex: 1; }
+        .checkbox-group { margin-top: 10px; }
+        .checkbox-group label { font-weight: normal; display: flex; align-items: center; }
+        .checkbox-group input[type="checkbox"] { margin-right: 8px; }
+        .help-text { font-size: 0.9em; color: #666; margin-top: 5px; }
+    </style>
+</head>
+<body>
+    <div class="form-container">
+        <h1 th:text="${titre}">Permission</h1>
+
+        <div th:if="${errorMessage}" class="alert alert-danger" th:text="${errorMessage}"></div>
+
+        <form th:object="${permission}"
+              th:action="${permission.id} != null ? @{'/securite/permissions/' + ${permission.id} + '/modifier'} : @{/securite/permissions/nouveau}"
+              method="post">
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="nom">Nom de la Permission *</label>
+                    <input type="text" id="nom" th:field="*{nom}" required 
+                           placeholder="Ex: SECURITE_LIRE" />
+                    <div class="help-text">Format recommandé: MODULE_ACTION (ex: SECURITE_LIRE)</div>
+                    <div th:if="${#fields.hasErrors('nom')}" th:errors="*{nom}" style="color: red;"></div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="niveauPriorite">Niveau de Priorité</label>
+                    <input type="number" id="niveauPriorite" th:field="*{niveauPriorite}" 
+                           min="0" max="100" value="0" />
+                    <div class="help-text">0 = priorité normale, plus élevé = plus prioritaire</div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="description">Description</label>
+                <textarea id="description" th:field="*{description}" 
+                          placeholder="Description de la permission..."></textarea>
+                <div th:if="${#fields.hasErrors('description')}" th:errors="*{description}" style="color: red;"></div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="nomModule">Nom du Module *</label>
+                    <select id="nomModule" th:field="*{nomModule}" required>
+                        <option value="">Sélectionner un module</option>
+                        <option th:each="module : ${modules}" 
+                                th:value="${module}" 
+                                th:text="${module}"></option>
+                    </select>
+                    <div class="help-text">Module auquel appartient cette permission</div>
+                    <div th:if="${#fields.hasErrors('nomModule')}" th:errors="*{nomModule}" style="color: red;"></div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="nomAction">Nom de l'Action *</label>
+                    <input type="text" id="nomAction" th:field="*{nomAction}" required 
+                           placeholder="Ex: LIRE, CREER, MODIFIER" />
+                    <div class="help-text">Action spécifique (LIRE, CREER, MODIFIER, SUPPRIMER, etc.)</div>
+                    <div th:if="${#fields.hasErrors('nomAction')}" th:errors="*{nomAction}" style="color: red;"></div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="urlPattern">URL Pattern</label>
+                <input type="text" id="urlPattern" th:field="*{urlPattern}" 
+                       placeholder="Ex: /securite/**" />
+                <div class="help-text">Pattern d'URL pour la sécurité (optionnel, sera généré automatiquement si vide)</div>
+                <div th:if="${#fields.hasErrors('urlPattern')}" th:errors="*{urlPattern}" style="color: red;"></div>
+            </div>
+
+            <div class="checkbox-group">
+                <label>
+                    <input type="checkbox" th:field="*{permissionActif}" />
+                    Permission active
+                </label>
+                <div class="help-text">Une permission inactive ne sera pas prise en compte dans la sécurité</div>
+            </div>
+
+            <div style="margin-top: 30px;">
+                <button type="submit" class="btn btn-primary">Enregistrer</button>
+                <a th:href="@{/securite/permissions}" class="btn btn-secondary">Annuler</a>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const nomModuleField = document.getElementById('nomModule');
+            const nomActionField = document.getElementById('nomAction');
+            const nomField = document.getElementById('nom');
+            const urlPatternField = document.getElementById('urlPattern');
+            
+            // Générer automatiquement le nom de la permission
+            function generatePermissionName() {
+                const module = nomModuleField.value;
+                const action = nomActionField.value;
+                
+                if (module && action) {
+                    const generatedName = module.toUpperCase() + '_' + action.toUpperCase();
+                    if (!nomField.value || nomField.value === '') {
+                        nomField.value = generatedName;
+                    }
+                }
+            }
+            
+            // Générer automatiquement l'URL pattern
+            function generateUrlPattern() {
+                const module = nomModuleField.value;
+                
+                if (module && (!urlPatternField.value || urlPatternField.value === '')) {
+                    urlPatternField.value = '/' + module.toLowerCase() + '/**';
+                }
+            }
+            
+            nomModuleField.addEventListener('change', function() {
+                generatePermissionName();
+                generateUrlPattern();
+            });
+            
+            nomActionField.addEventListener('input', function() {
+                generatePermissionName();
+            });
+            
+            // Initialiser les valeurs si elles sont vides
+            generatePermissionName();
+            generateUrlPattern();
+        });
+    </script>
+
+</body>
+</html>

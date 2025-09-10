@@ -1,0 +1,34 @@
+<!-- src/main/resources/templates/operations/formInterneFragment.html -->
+<div th:fragment="formInterne (operationInterne, vehiculesTarer)">
+    <h1 th:text="${operationInterne.id != 0 ? 'Modifier Opération Interne' : 'Nouvelle Opération Interne'}"></h1>
+
+    <form th:action="@{${operationInterne.id == null}
+           ? '/pontbascule/operations-internes'
+           : '/pontbascule/operations-internes/' + ${operationInterne.id}}"
+          th:object="${operationInterne}" method="post">
+
+        <div class="mb-3">
+            <label for="vehiculeTarer" class="form-label">Véhicule Tarer</label>
+            <select id="vehiculeTarer"
+                    th:field="*{vehiculeTarer}"
+                    class="form-select">
+                <option value="" disabled selected>Choisir un véhicule</option>
+                <option th:each="veh : ${vehiculesTarer}"
+                        th:value="${veh.immatriculation}"
+                        th:text="${veh.immatriculation}"></option>
+            </select>
+            <div class="text-danger"
+                 th:if="${#fields.hasErrors('vehiculeTarer')}"
+                 th:errors="*{vehiculeTarer}"></div>
+        </div>
+
+        <a th:href="@{/pontbascule/vehicules-tarer/nouveau}"
+           class="btn btn-link">Créer un nouveau véhicule</a>
+
+        <button type="submit" class="btn btn-success"
+                th:text="${operationInterne.id != 0 ? 'Modifier' : 'Enregistrer'}"></button>
+
+        <a th:href="@{/pontbascule/operations-internes}"
+           class="btn btn-secondary">Annuler</a>
+    </form>
+</div>

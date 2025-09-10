@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Data - ERP Security</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    
+    <style>
+        .test-card {
+            background: white;
+            border-radius: 1rem;
+            padding: 2rem;
+            box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+            border: none;
+            margin-bottom: 2rem;
+        }
+        
+        .stats-badge {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 2rem;
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+        
+        .btn-test {
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-test:hover {
+            transform: translateY(-2px);
+        }
+        
+        .btn-init-all {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            color: white;
+            font-size: 1.1rem;
+            padding: 1rem 2rem;
+        }
+        
+        .btn-init-permissions {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            border: none;
+            color: white;
+        }
+        
+        .btn-init-roles {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            border: none;
+            color: white;
+        }
+        
+        .btn-init-users {
+            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+            border: none;
+            color: white;
+        }
+        
+        .btn-assign-permissions {
+            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+            border: none;
+            color: white;
+        }
+        
+        .info-section {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 1rem;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+        
+        .warning-section {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 1rem;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .warning-section h5 {
+            color: #856404;
+        }
+        
+        .warning-section p {
+            color: #856404;
+            margin-bottom: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <nav class="col-md-3 col-lg-2 d-md-block bg-dark sidebar collapse" style="min-height: 100vh;">
+                <div class="position-sticky pt-3">
+                    <div class="text-center mb-4">
+                        <h4 class="text-white">ERP Security</h4>
+                        <small class="text-white-50">Gestion des accès</small>
+                    </div>
+                    
+                    <ul class="nav flex-column">
+                        <li class="nav-item">
+                            <a class="nav-link text-white-50" th:href="@{/dashboard}">
+                                <i class="bi bi-speedometer2"></i>
+                                Dashboard
+                            </a>
+                        </li>
+                        
+                        <!-- Module Sécurité -->
+                        <li class="nav-item" sec:authorize="hasAuthority('SECURITE_LIRE')">
+                            <a class="nav-link text-white-50" th:href="@{/securite/utilisateurs}">
+                                <i class="bi bi-shield-lock"></i>
+                                Sécurité
+                            </a>
+                        </li>
+                        
+                        <!-- Module Contact -->
+                        <li class="nav-item" sec:authorize="hasAuthority('CONTACT_LIRE')">
+                            <a class="nav-link text-white-50" th:href="@{/contact}">
+                                <i class="bi bi-person-lines-fill"></i>
+                                Contacts
+                            </a>
+                        </li>
+                        
+                        <!-- Module Comptabilité -->
+                        <li class="nav-item" sec:authorize="hasAuthority('COMPTABILITE_LIRE')">
+                            <a class="nav-link text-white-50" th:href="@{/comptabilite}">
+                                <i class="bi bi-calculator"></i>
+                                Comptabilité
+                            </a>
+                        </li>
+                        
+                        <!-- Module RH -->
+                        <li class="nav-item" sec:authorize="hasAuthority('RH_LIRE')">
+                            <a class="nav-link text-white-50" th:href="@{/rh}">
+                                <i class="bi bi-people-fill"></i>
+                                Ressources Humaines
+                            </a>
+                        </li>
+                        
+                        <!-- Module Stock -->
+                        <li class="nav-item" sec:authorize="hasAuthority('STOCK_LIRE')">
+                            <a class="nav-link text-white-50" th:href="@{/stock}">
+                                <i class="bi bi-box-seam"></i>
+                                Stock
+                            </a>
+                        </li>
+                        
+                        <!-- Module Vente -->
+                        <li class="nav-item" sec:authorize="hasAuthority('VENTE_LIRE')">
+                            <a class="nav-link text-white-50" th:href="@{/vente}">
+                                <i class="bi bi-cart-check"></i>
+                                Ventes
+                            </a>
+                        </li>
+                        
+                        <!-- Module Achat -->
+                        <li class="nav-item" sec:authorize="hasAuthority('ACHAT_LIRE')">
+                            <a class="nav-link text-white-50" th:href="@{/achat}">
+                                <i class="bi bi-cart-plus"></i>
+                                Achats
+                            </a>
+                        </li>
+                    </ul>
+                    
+                    <hr class="text-white-50">
+                    
+                    <!-- Sous-menu Sécurité -->
+                    <div sec:authorize="hasAuthority('SECURITE_LIRE')">
+                        <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-white-50">
+                            <span>Gestion Sécurité</span>
+                        </h6>
+                        <ul class="nav flex-column mb-2">
+                            <li class="nav-item">
+                                <a class="nav-link text-white-50" th:href="@{/securite/utilisateurs}">
+                                    <i class="bi bi-person-badge"></i>
+                                    Utilisateurs
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-white-50" th:href="@{/securite/roles}">
+                                    <i class="bi bi-person-gear"></i>
+                                    Rôles
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-white-50" th:href="@{/securite/permissions}">
+                                    <i class="bi bi-key"></i>
+                                    Permissions
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link active text-white" href="#">
+                                    <i class="bi bi-database-check"></i>
+                                    Test Data
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </nav>
+            
+            <!-- Main content -->
+            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4" style="background-color: #f8f9fa; min-height: 100vh;">
+                <!-- Top navbar -->
+                <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm mb-4">
+                    <div class="container-fluid">
+                        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#sidebar">
+                            <span class="navbar-toggler-icon"></span>
+                        </button>
+                        
+                        <div class="navbar-nav ms-auto">
+                            <div class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
+                                    <i class="bi bi-person-circle"></i>
+                                    <span sec:authentication="name">Utilisateur</span>
+                                </a>
+                                <ul class="dropdown-menu">
+                                    <li><a class="dropdown-item" href="#"><i class="bi bi-person"></i> Profil</a></li>
+                                    <li><a class="dropdown-item" href="#"><i class="bi bi-gear"></i> Paramètres</a></li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li>
+                                        <form th:action="@{/logout}" method="post" class="d-inline">
+                                            <button type="submit" class="dropdown-item">
+                                                <i class="bi bi-box-arrow-right"></i> Déconnexion
+                                            </button>
+                                        </form>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </nav>
+                
+                <!-- Flash messages -->
+                <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert">
+                    <i class="bi bi-check-circle"></i>
+                    <span th:text="${successMessage}"></span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+                
+                <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <i class="bi bi-exclamation-triangle"></i>
+                    <span th:text="${errorMessage}"></span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+                
+                <!-- Info Section -->
+                <div class="info-section">
+                    <h2><i class="bi bi-database-check"></i> Initialisation des Données de Test</h2>
+                    <p class="mb-0">Cette page vous permet d'initialiser rapidement des données de test pour tester le module de sécurité.</p>
+                </div>
+                
+                <!-- Warning Section -->
+                <div class="warning-section">
+                    <h5><i class="bi bi-exclamation-triangle"></i> Attention</h5>
+                    <p>Cette fonctionnalité est destinée uniquement aux tests. Les données existantes peuvent être écrasées.</p>
+                </div>
+                
+                <!-- Statistics -->
+                <div class="row mb-4">
+                    <div class="col-md-4">
+                        <div class="text-center">
+                            <div class="stats-badge mb-2">
+                                <i class="bi bi-key"></i>
+                                <span th:text="${nbPermissions}">0</span> Permissions
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="text-center">
+                            <div class="stats-badge mb-2">
+                                <i class="bi bi-person-gear"></i>
+                                <span th:text="${nbRoles}">0</span> Rôles
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="text-center">
+                            <div class="stats-badge mb-2">
+                                <i class="bi bi-person-badge"></i>
+                                <span th:text="${nbUtilisateurs}">0</span> Utilisateurs
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Quick Init Button -->
+                <div class="test-card text-center">
+                    <h4 class="mb-4">
+                        <i class="bi bi-lightning"></i>
+                        Initialisation Rapide
+                    </h4>
+                    <p class="text-muted mb-4">Cliquez sur le bouton ci-dessous pour initialiser toutes les données de test en une seule fois.</p>
+                    
+                    <form th:action="@{/securite/test/init-all}" method="post" class="d-inline">
+                        <button type="submit" class="btn btn-init-all btn-test" 
+                                onclick="return confirm('Êtes-vous sûr de vouloir initialiser toutes les données de test ?')">
+                            <i class="bi bi-play-circle"></i>
+                            Initialiser Toutes les Données
+                        </button>
+                    </form>
+                </div>
+                
+                <!-- Individual Init Buttons -->
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="test-card">
+                            <h5 class="mb-3">
+                                <i class="bi bi-key"></i>
+                                Permissions
+                            </h5>
+                            <p class="text-muted mb-3">Créer toutes les permissions pour les modules ERP</p>
+                            <form th:action="@{/securite/test/init-permissions}" method="post">
+                                <button type="submit" class="btn btn-init-permissions btn-test">
+                                    <i class="bi bi-plus-circle"></i>
+                                    Créer les Permissions
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <div class="test-card">
+                            <h5 class="mb-3">
+                                <i class="bi bi-person-gear"></i>
+                                Rôles
+                            </h5>
+                            <p class="text-muted mb-3">Créer les rôles de base (ADMIN, MANAGER, USER, READER)</p>
+                            <form th:action="@{/securite/test/init-roles}" method="post">
+                                <button type="submit" class="btn btn-init-roles btn-test">
+                                    <i class="bi bi-plus-circle"></i>
+                                    Créer les Rôles
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <div class="test-card">
+                            <h5 class="mb-3">
+                                <i class="bi bi-person-badge"></i>
+                                Utilisateurs
+                            </h5>
+                            <p class="text-muted mb-3">Créer les utilisateurs de test avec leurs rôles</p>
+                            <form th:action="@{/securite/test/init-users}" method="post">
+                                <button type="submit" class="btn btn-init-users btn-test">
+                                    <i class="bi bi-plus-circle"></i>
+                                    Créer les Utilisateurs
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <div class="test-card">
+                            <h5 class="mb-3">
+                                <i class="bi bi-link"></i>
+                                Assigner Permissions
+                            </h5>
+                            <p class="text-muted mb-3">Assigner les permissions aux rôles existants</p>
+                            <form th:action="@{/securite/test/assign-permissions}" method="post">
+                                <button type="submit" class="btn btn-assign-permissions btn-test">
+                                    <i class="bi bi-link-45deg"></i>
+                                    Assigner Permissions
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Test Accounts Info -->
+                <div class="test-card">
+                    <h5 class="mb-3">
+                        <i class="bi bi-info-circle"></i>
+                        Comptes de Test Disponibles
+                    </h5>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="card border-primary mb-3">
+                                <div class="card-header bg-primary text-white">
+                                    <i class="bi bi-shield-check"></i> Administrateur
+                                </div>
+                                <div class="card-body">
+                                    <p class="card-text"><strong>Login:</strong> admin</p>
+                                    <p class="card-text"><strong>Mot de passe:</strong> admin123</p>
+                                    <p class="card-text"><strong>Droits:</strong> Tous les droits</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card border-success mb-3">
+                                <div class="card-header bg-success text-white">
+                                    <i class="bi bi-person-check"></i> Manager
+                                </div>
+                                <div class="card-body">
+                                    <p class="card-text"><strong>Login:</strong> manager</p>
+                                    <p class="card-text"><strong>Mot de passe:</strong> manager123</p>
+                                    <p class="card-text"><strong>Droits:</strong> Lecture, Création, Modification</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card border-info mb-3">
+                                <div class="card-header bg-info text-white">
+                                    <i class="bi bi-person"></i> Utilisateur
+                                </div>
+                                <div class="card-body">
+                                    <p class="card-text"><strong>Login:</strong> user</p>
+                                    <p class="card-text"><strong>Mot de passe:</strong> user123</p>
+                                    <p class="card-text"><strong>Droits:</strong> Lecture, Création</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card border-warning mb-3">
+                                <div class="card-header bg-warning text-dark">
+                                    <i class="bi bi-eye"></i> Lecteur
+                                </div>
+                                <div class="card-body">
+                                    <p class="card-text"><strong>Login:</strong> reader</p>
+                                    <p class="card-text"><strong>Mot de passe:</strong> reader123</p>
+                                    <p class="card-text"><strong>Droits:</strong> Lecture uniquement</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+    
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

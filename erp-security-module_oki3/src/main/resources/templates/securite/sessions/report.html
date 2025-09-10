@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rapport Sessions - ERP Sécurité</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .report-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2rem;
+            border-radius: 10px;
+            margin-bottom: 2rem;
+        }
+        .stat-box {
+            background: white;
+            border-radius: 10px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            border-left: 4px solid #007bff;
+        }
+        .chart-section {
+            background: white;
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .table-section {
+            background: white;
+            border-radius: 10px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        @media print {
+            .no-print { display: none !important; }
+            .chart-section { page-break-inside: avoid; }
+        }
+    </style>
+</head>
+<body>
+    <div th:replace="~{layout/main :: layout(~{::main}, 'Rapport Sessions')}">
+        <main>
+            <div class="container-fluid">
+                <!-- En-tête du rapport -->
+                <div class="report-header">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <h1><i class="fas fa-chart-line"></i> Rapport d'Analyse des Sessions</h1>
+                            <p class="mb-0">
+                                Période: <span th:text="${#temporals.format(dateDebut, 'dd/MM/yyyy')}">01/01/2024</span> 
+                                au <span th:text="${#temporals.format(dateFin, 'dd/MM/yyyy')}">31/01/2024</span>
+                            </p>
+                            <small>Généré le <span th:text="${#temporals.format(T(java.time.LocalDateTime).now(), 'dd/MM/yyyy à HH:mm')}">01/01/2024 à 10:00</span></small>
+                        </div>
+                        <div class="col-md-4 text-end no-print">
+                            <button class="btn btn-light me-2" onclick="window.print()">
+                                <i class="fas fa-print"></i> Imprimer
+                            </button>
+                            <button class="btn btn-light" onclick="exportToPDF()">
+                                <i class="fas fa-file-pdf"></i> PDF
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Résumé exécutif -->
+                <div class="row mb-4">
+                    <div class="col-md-3">
+                        <div class="stat-box text-center">
+                            <h3 class="text-primary" th:text="${report.totalSessions}">0</h3>
+                            <p class="mb-0">Sessions Totales</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="stat-box text-center">
+                            <h3 class="text-success" th:text="${report.activeSessions}">0</h3>
+                            <p class="mb-0">Sessions Actives</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="stat-box text-center">
+                            <h3 class="text-info" th:text="${report.activeUsers}">0</h3>
+                            <p class="mb-0">Utilisateurs Uniques</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="stat-box text-center">
+                            <h3 class="text-warning" th:text="${report.suspiciousSessions != null ? report.suspiciousSessions.size() : 0}">0</h3>
+                            <p class="mb-0">Sessions Suspectes</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Graphiques d'analyse -->
+                <div class="row">
+                    <div class="col-lg-8">
+                        <div class="chart-section">
+                            <h4><i class="fas fa-chart-area"></i> Évolution des Sessions</h4>
+                            <canvas id="sessionsEvolutionChart" height="100"></canvas>
+                        </div>
+                    </div>
+                    <div class="col-lg-4">
+                        <div class="chart-section">
+                            <h4><i class="fas fa-chart-pie"></i> Répartition par Statut</h4>
+                            <canvas id="statusChart" height="200"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-lg-6">
+                        <div class="chart-section">
+                            <h4><i class="fas fa-globe"></i> Sessions par Navigateur</h4>
+                            <canvas id="browserChart" height="150"></canvas>
+                        </div>
+                    </div>
+                    <div class="col-lg-6">
+                        <div class="chart-section">
+                            <h4><i class="fas fa-desktop"></i> Sessions par Système</h4>
+                            <canvas id="osChart" height="150"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Analyse détaillée -->
+                <div class="row">
+                    <div class="col-12">
+                        <div class="table-section">
+                            <h4><i class="fas fa-users"></i> Top 10 Utilisateurs les Plus Actifs</h4>
+                            <div class="table-responsive">
+                                <table class="table table-striped">
+                                    <thead class="table-dark">
+                                        <tr>
+                                            <th>Rang</th>
+                                            <th>Utilisateur</th>
+                                            <th>Nombre de Sessions</th>
+                                            <th>Durée Totale</th>
+                                            <th>Durée Moyenne</th>
+                                            <th>Dernière Connexion</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr th:each="user, iterStat : ${report.sessionsByUser}" th:if="${iterStat.index < 10}">
+                                            <td th:text="${iterStat.index + 1}">1</td>
+                                            <td th:text="${user[0]}">username</td>
+                                            <td th:text="${user[1]}">10</td>
+                                            <td th:text="${user[2] != null ? user[2] + 'h' : 'N/A'}">25h</td>
+                                            <td th:text="${user[3] != null ? #numbers.formatDecimal(user[3], 1, 1) + 'h' : 'N/A'}">2.5h</td>
+                                            <td th:text="${user[4] != null ? #temporals.format(user[4], 'dd/MM/yyyy HH:mm') : 'N/A'}">01/01/2024 10:00</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Analyse de sécurité -->
+                <div class="row" th:if="${report.suspiciousSessions != null and !report.suspiciousSessions.empty}">
+                    <div class="col-12">
+                        <div class="table-section">
+                            <h4 class="text-warning"><i class="fas fa-shield-alt"></i> Activités Suspectes Détectées</h4>
+                            <div class="alert alert-warning">
+                                <strong>Attention:</strong> Les activités suivantes nécessitent une investigation approfondie.
+                            </div>
+                            <div class="table-responsive">
+                                <table class="table table-striped">
+                                    <thead class="table-warning">
+                                        <tr>
+                                            <th>Utilisateur</th>
+                                            <th>IP Source</th>
+                                            <th>IP Destination</th>
+                                            <th>Date Source</th>
+                                            <th>Date Destination</th>
+                                            <th>Intervalle</th>
+                                            <th>Risque</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr th:each="suspicious : ${report.suspiciousSessions}">
+                                            <td th:text="${suspicious[0]}">username</td>
+                                            <td th:text="${suspicious[1]}">192.168.1.1</td>
+                                            <td th:text="${suspicious[2]}">192.168.1.2</td>
+                                            <td th:text="${suspicious[3]}">2024-01-01 10:00</td>
+                                            <td th:text="${suspicious[4]}">2024-01-01 10:05</td>
+                                            <td>5 min</td>
+                                            <td><span class="badge bg-warning">Élevé</span></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Analyse par adresse IP -->
+                <div class="row">
+                    <div class="col-12">
+                        <div class="table-section">
+                            <h4><i class="fas fa-network-wired"></i> Analyse par Adresse IP</h4>
+                            <div class="table-responsive">
+                                <table class="table table-striped">
+                                    <thead class="table-dark">
+                                        <tr>
+                                            <th>Adresse IP</th>
+                                            <th>Nombre de Sessions</th>
+                                            <th>Utilisateurs Uniques</th>
+                                            <th>Première Connexion</th>
+                                            <th>Dernière Connexion</th>
+                                            <th>Statut</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr th:each="ip : ${report.sessionsByIP}">
+                                            <td th:text="${ip[0]}">192.168.1.1</td>
+                                            <td th:text="${ip[1]}">5</td>
+                                            <td th:text="${ip[2]}">2</td>
+                                            <td th:text="${ip[3]}">01/01/2024 08:00</td>
+                                            <td th:text="${ip[4]}">01/01/2024 18:00</td>
+                                            <td>
+                                                <span class="badge bg-success" th:if="${ip[5] == 'NORMAL'}">Normal</span>
+                                                <span class="badge bg-warning" th:if="${ip[5] == 'SUSPICIOUS'}">Suspect</span>
+                                                <span class="badge bg-danger" th:if="${ip[5] == 'BLOCKED'}">Bloqué</span>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recommandations -->
+                <div class="row">
+                    <div class="col-12">
+                        <div class="table-section">
+                            <h4><i class="fas fa-lightbulb"></i> Recommandations de Sécurité</h4>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <h6>Actions Immédiates</h6>
+                                    <ul class="list-group list-group-flush">
+                                        <li class="list-group-item" th:if="${report.suspiciousSessions != null and report.suspiciousSessions.size() > 0}">
+                                            <i class="fas fa-exclamation-triangle text-warning"></i>
+                                            Investiguer les <span th:text="${report.suspiciousSessions.size()}">0</span> sessions suspectes détectées
+                                        </li>
+                                        <li class="list-group-item" th:if="${report.longSessions > 0}">
+                                            <i class="fas fa-clock text-info"></i>
+                                            Réviser les <span th:text="${report.longSessions}">0</span> sessions de longue durée (>8h)
+                                        </li>
+                                        <li class="list-group-item" th:if="${report.multipleIpUsers > 0}">
+                                            <i class="fas fa-network-wired text-warning"></i>
+                                            Vérifier les <span th:text="${report.multipleIpUsers}">0</span> utilisateurs avec multiples IPs
+                                        </li>
+                                    </ul>
+                                </div>
+                                <div class="col-md-6">
+                                    <h6>Améliorations Suggérées</h6>
+                                    <ul class="list-group list-group-flush">
+                                        <li class="list-group-item">
+                                            <i class="fas fa-shield-alt text-success"></i>
+                                            Implémenter l'authentification à deux facteurs
+                                        </li>
+                                        <li class="list-group-item">
+                                            <i class="fas fa-clock text-info"></i>
+                                            Réduire la durée de session par défaut à 4h
+                                        </li>
+                                        <li class="list-group-item">
+                                            <i class="fas fa-bell text-primary"></i>
+                                            Configurer des alertes pour les connexions suspectes
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Pied de rapport -->
+                <div class="row mt-4 no-print">
+                    <div class="col-12 text-center">
+                        <a href="/securite/sessions" class="btn btn-primary">
+                            <i class="fas fa-arrow-left"></i> Retour aux Sessions
+                        </a>
+                        <a href="/securite/sessions/dashboard" class="btn btn-info">
+                            <i class="fas fa-tachometer-alt"></i> Tableau de Bord
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script th:inline="javascript">
+        // Données du rapport
+        const reportData = /*[[${report}]]*/ {};
+
+        // Configuration des couleurs
+        const colors = {
+            primary: '#007bff',
+            success: '#28a745',
+            warning: '#ffc107',
+            danger: '#dc3545',
+            info: '#17a2b8'
+        };
+
+        // Graphique d'évolution des sessions
+        const evolutionCtx = document.getElementById('sessionsEvolutionChart').getContext('2d');
+        new Chart(evolutionCtx, {
+            type: 'line',
+            data: {
+                labels: reportData.dailyStats ? reportData.dailyStats.map(d => d.date) : [],
+                datasets: [{
+                    label: 'Sessions Créées',
+                    data: reportData.dailyStats ? reportData.dailyStats.map(d => d.created) : [],
+                    borderColor: colors.primary,
+                    backgroundColor: colors.primary + '20',
+                    tension: 0.4,
+                    fill: true
+                }, {
+                    label: 'Sessions Actives',
+                    data: reportData.dailyStats ? reportData.dailyStats.map(d => d.active) : [],
+                    borderColor: colors.success,
+                    backgroundColor: colors.success + '20',
+                    tension: 0.4,
+                    fill: true
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+
+        // Graphique de statut
+        const statusCtx = document.getElementById('statusChart').getContext('2d');
+        new Chart(statusCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Actives', 'Terminées', 'Expirées'],
+                datasets: [{
+                    data: [
+                        reportData.activeSessions || 0,
+                        reportData.terminatedSessions || 0,
+                        reportData.expiredSessions || 0
+                    ],
+                    backgroundColor: [colors.success, colors.info, colors.warning]
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    }
+                }
+            }
+        });
+
+        // Graphique des navigateurs
+        const browserCtx = document.getElementById('browserChart').getContext('2d');
+        new Chart(browserCtx, {
+            type: 'bar',
+            data: {
+                labels: reportData.sessionsByBrowser ? reportData.sessionsByBrowser.map(b => b[0]) : [],
+                datasets: [{
+                    label: 'Sessions',
+                    data: reportData.sessionsByBrowser ? reportData.sessionsByBrowser.map(b => b[1]) : [],
+                    backgroundColor: colors.primary,
+                    borderColor: colors.primary,
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+
+        // Graphique des systèmes d'exploitation
+        const osCtx = document.getElementById('osChart').getContext('2d');
+        new Chart(osCtx, {
+            type: 'bar',
+            data: {
+                labels: reportData.sessionsByOS ? reportData.sessionsByOS.map(os => os[0]) : [],
+                datasets: [{
+                    label: 'Sessions',
+                    data: reportData.sessionsByOS ? reportData.sessionsByOS.map(os => os[1]) : [],
+                    backgroundColor: colors.info,
+                    borderColor: colors.info,
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+
+        // Fonction d'export PDF
+        function exportToPDF() {
+            window.open('/api/sessions/export/pdf?dateDebut=' + 
+                encodeURIComponent('[[${dateDebut}]]') + 
+                '&dateFin=' + encodeURIComponent('[[${dateFin}]]'), '_blank');
+        }
+    </script>
+</body>
+</html>

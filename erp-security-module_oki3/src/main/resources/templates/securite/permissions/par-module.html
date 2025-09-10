@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <title>Permissions par Module</title>
+    <link rel="stylesheet" th:href="@{/css/styles.css}" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        table { border-collapse: collapse; width: 100%; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background-color: #f4f4f4; font-weight: bold; }
+        .alert { padding: 10px; margin: 10px 0; border-radius: 4px; }
+        .alert-success { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .alert-danger { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .btn { padding: 5px 10px; margin: 2px; text-decoration: none; border-radius: 3px; display: inline-block; }
+        .btn-primary { background-color: #007bff; color: white; }
+        .btn-warning { background-color: #ffc107; color: black; }
+        .btn-danger { background-color: #dc3545; color: white; }
+        .btn-sm { padding: 3px 8px; font-size: 12px; }
+        .status-active { color: #28a745; font-weight: bold; }
+        .status-inactive { color: #dc3545; font-weight: bold; }
+        .action-badge { background: #d1ecf1; color: #0c5460; padding: 2px 6px; border-radius: 3px; font-size: 0.8em; }
+        .module-header { background: #e9ecef; padding: 15px; border-radius: 6px; margin: 20px 0; }
+        .module-header h2 { margin: 0; color: #007bff; }
+    </style>
+</head>
+<body>
+    <h1>Permissions par Module</h1>
+
+    <div class="module-header">
+        <h2 th:text="${module}">Nom du Module</h2>
+        <p><strong>Nombre de permissions:</strong> <span th:text="${nombrePermissions}"></span></p>
+    </div>
+
+    <div style="margin: 20px 0;">
+        <a th:href="@{/securite/permissions}" class="btn btn-primary">← Retour à la liste complète</a>
+        <a th:href="@{/securite/permissions/nouveau}" class="btn btn-primary">Nouvelle Permission</a>
+        <a th:href="@{/securite/roles}" class="btn btn-primary">Gérer les Rôles</a>
+    </div>
+
+    <div th:if="${permissions != null and !permissions.empty}">
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Nom</th>
+                    <th>Description</th>
+                    <th>Action</th>
+                    <th>URL Pattern</th>
+                    <th>Statut</th>
+                    <th>Priorité</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="permission : ${permissions}">
+                    <td th:text="${permission.id}"></td>
+                    <td th:text="${permission.nom}"></td>
+                    <td th:text="${permission.description ?: 'Aucune description'}"></td>
+                    <td>
+                        <span class="action-badge" th:text="${permission.nomAction}"></span>
+                    </td>
+                    <td th:text="${permission.urlPattern ?: 'N/A'}"></td>
+                    <td>
+                        <span th:if="${permission.permissionActif}" class="status-active">Actif</span>
+                        <span th:unless="${permission.permissionActif}" class="status-inactive">Inactif</span>
+                    </td>
+                    <td th:text="${permission.niveauPriorite}"></td>
+                    <td>
+                        <a th:href="@{'/securite/permissions/' + ${permission.id}}" class="btn btn-sm btn-primary">Voir</a>
+                        <a th:href="@{'/securite/permissions/' + ${permission.id} + '/modifier'}" class="btn btn-sm btn-warning">Modifier</a>
+                        
+                        <form th:action="@{'/securite/permissions/' + ${permission.id} + '/activer'}" method="post" style="display:inline-block;" th:if="${!permission.permissionActif}">
+                            <button type="submit" class="btn btn-sm btn-primary">Activer</button>
+                        </form>
+                        
+                        <form th:action="@{'/securite/permissions/' + ${permission.id} + '/desactiver'}" method="post" style="display:inline-block;" th:if="${permission.permissionActif}">
+                            <button type="submit" class="btn btn-sm btn-warning">Désactiver</button>
+                        </form>
+                        
+                        <form th:action="@{'/securite/permissions/' + ${permission.id} + '/supprimer'}" method="post" style="display:inline-block;">
+                            <button type="submit" class="btn btn-sm btn-danger" 
+                                    onclick="return confirm('Êtes-vous sûr de vouloir supprimer cette permission ?')">Supprimer</button>
+                        </form>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div th:if="${permissions == null or permissions.empty}" style="text-align: center; margin: 40px 0; color: #666;">
+        <p>Aucune permission trouvée pour le module "<span th:text="${module}"></span>".</p>
+        <p><a th:href="@{/securite/permissions/nouveau}">Créer une nouvelle permission</a> pour ce module.</p>
+    </div>
+
+    <div style="margin-top: 30px;">
+        <a th:href="@{/securite/utilisateurs}" class="btn btn-primary">Gérer les Utilisateurs</a>
+    </div>
+
+</body>
+</html>

@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Opérations Internes / Externes</title>
+    <!-- Bootstrap (local ou CDN) -->
+    <link rel="stylesheet" th:href="@{/css/bootstrap.min.css}" />
+    <!-- Petit style pour le séparateur -->
+    <style>
+        .split {
+            display: flex;
+            flex-direction: column;
+            height: 90vh;               /* hauteur totale de la zone split */
+            border: 1px solid #dee2e6; /* juste pour visualiser les limites */
+        }
+        .pane {
+            overflow: auto;            /* scroll interne si le tableau dépasse */
+            padding: 0.5rem;
+        }
+        .gutter {
+            background: #e9ecef;
+            height: 6px;
+            cursor: row-resize;
+        }
+        /* Amélioration de l’apparence du tableau */
+        .table th, .table td { white-space: nowrap; }
+    </style>
+</head>
+<body>
+<div class="container-fluid mt-3">
+    <!-- =====================  SPLIT PANEL ===================== -->
+    <div id="split" class="split">
+
+        <!-- ----------  HAUT – Opérations Internes ---------- -->
+        <div class="pane bg-light">
+            <h3>Liste des Opérations Internes</h3>
+            <a th:href="@{/pontbascule/operations-internes/nouveau}"
+               class="btn btn-primary mb-2">Nouvelle Opération Interne</a>
+
+            <table class="table table-sm table-bordered">
+                <thead class="thead-light">
+                <tr>
+                    <th>ID</th>
+                    <th>Immatriculation</th>
+                    <th>Peser1</th>
+                    <th>Actions</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="opInt : ${operationsInternes}">
+                    <td th:text="${opInt.id}"></td>
+                    <td th:text="${opInt.vehiculeTarer != null ? opInt.vehiculeTarer.immatriculation : 'Non défini'}"></td>
+                    <td th:text="${opInt.vehiculeTarer != null ? opInt.vehiculeTarer.peser1 : 'Non défini'}"></td>
+                    <td>
+                        <a th:href="@{/pontbascule/operations-internes/{id}/modifier(id=${opInt.id})}"
+                           class="btn btn-warning btn-sm">Modifier</a>
+                        <a th:href="@{/pontbascule/operations/nouveau(operationInterneId=${opInt.id})}"
+                           class="btn btn-primary btn-sm">Continuer</a>
+                        <form th:action="@{/pontbascule/operations-internes/{id}/supprimer(id=${opInt.id})}"
+                              method="post" class="d-inline">
+                            <button type="submit" class="btn btn-danger btn-sm">Supprimer</button>
+                        </form>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- ----------  BAS – Opérations Externes ----------
+         (remplacez la variable par votre collection) -->
+        <div class="pane bg-white">
+            <h3>Liste des Opérations Externes</h3>
+            <a th:href="@{/pontbascule/operations-externes/nouveau}"
+               class="btn btn-primary mb-2">Nouvelle Opération Externe</a>
+
+            <table class="table table-sm table-bordered">
+                <thead class="thead-light">
+                <tr>
+                    <th>ID</th>
+                    <th>Immatriculation</th>
+                    <th>Peser1</th>
+                    <th>Actions</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="opExt : ${operationsExternes}">
+                    <td th:text="${opExt.id}"></td>
+                    <td th:text="${opExt.vehiculeExterne.immatriculation != null ? opExt.vehiculeExterne.immatriculation : 'Non défini'}"></td>
+                    <td th:text="${opExt.vehiculeExterne != null ? opExt.peser1 : 'Non défini'}"></td>
+                    <td>
+                        <a th:href="@{/pontbascule/operations-externes/{id}/modifier(id=${opExt.id})}"
+                           class="btn btn-warning btn-sm">Modifier</a>
+                           
+                           <a th:href="@{/pontbascule/operations/nouveau(operationInterneId=${opExt.id})}"
+                           class="btn btn-primary btn-sm">Continuer</a>
+                           
+                        <form th:action="@{/pontbascule/operations-externes/{id}/supprimer(id=${opExt.id})}"
+                              method="post" class="d-inline">
+                            <button type="submit" class="btn btn-danger btn-sm">Supprimer</button>
+                        </form>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+    </div> <!-- /#split -->
+</div>
+
+<!-- =====================  SPLIT.JS ===================== -->
+<script src="https://cdn.jsdelivr.net/npm/split.js@1.6.0/dist/split.min.js"></script>
+<script>
+    // Crée le séparateur vertical (drag‑and‑drop) entre les deux panneaux
+    Split(['#split > .pane:nth-child(1)', '#split > .pane:nth-child(2)'], {
+        direction: 'vertical',
+        sizes: [50, 50],          // 50 % haut, 50 % bas au chargement
+        minSize: 100,            // ne pas laisser un panneau devenir trop petit
+        gutterSize: 6,
+        cursor: 'row-resize',
+        gutter: function (index, direction) {
+            const gutter = document.createElement('div');
+            gutter.className = 'gutter';
+            return gutter;
+        }
+    });
+</script>
+</body>
+</html>

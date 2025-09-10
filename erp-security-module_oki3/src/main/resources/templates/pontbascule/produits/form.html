@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <title>Produit</title>
+</head>
+<body>
+<h1>Produit</h1>
+<form th:object="${produit}" th:action="${produit.idProduit} != null ? @{'/pontbascule/produits/' + ${produit.idProduit}} : @{/pontbascule/produits}" method="post">
+    <label>Désignation</label>
+    <input type="text" th:field="*{designationProduit}" />
+    <div th:if="${#fields.hasErrors('designationProduit')}" th:errors="*{designationProduit}"></div>
+    <button type="submit">Enregistrer</button>
+    <a th:href="@{/pontbascule}">Retour</a>
+    </form>
+</body>
+</html>
+
+

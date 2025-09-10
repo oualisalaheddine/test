@@ -1,0 +1,44 @@
+
+<!-- src/main/resources/templates/operations/formExterneFragment.html -->
+<div th:fragment="formExterne (operationExterne, vehiculesExterne)">
+    <h1 th:text="${operationExterne.id != null ? 'Modifier Opération Externe' : 'Nouvelle Opération Externe'}"></h1>
+
+    <form th:action="@{${operationExterne.id == null}
+           ? '/pontbascule/operations-externes'
+           : '/pontbascule/operations-externes/' + ${operationExterne.id}}"
+          th:object="${operationExterne}" method="post">
+
+        <div class="mb-3">
+            <label for="vehiculeExterne" class="form-label">Véhicule Externe</label>
+            <select id="vehiculeExterne"
+                    th:field="*{vehiculeExterne}"
+                    class="form-select">
+                <option value="" disabled selected>Choisir un véhicule</option>
+                <option th:each="veh : ${vehiculeExterne}"
+                        th:value="${veh.immatriculation}"
+                        th:text="${veh.immatriculation}"></option>
+            </select>
+            <div class="text-danger"
+                 th:if="${#fields.hasErrors('vehiculeExterne')}"
+                 th:errors="*{vehiculeExterne}"></div>
+        </div>
+
+        <div class="mb-3">
+            <label for="peser1" class="form-label">Peser1</label>
+            <input type="text" id="peser1" th:field="*{peser1}"
+                   class="form-control"/>
+            <div class="text-danger"
+                 th:if="${#fields.hasErrors('peser1')}"
+                 th:errors="*{peser1}"></div>
+        </div>
+
+        <a th:href="@{/pontbascule/vehicules-tarer/nouveau}"
+           class="btn btn-link">Créer un nouveau véhicule</a>
+
+        <button type="submit" class="btn btn-success"
+                th:text="${operationExterne.id != null ? 'Modifier' : 'Enregistrer'}"></button>
+
+        <a th:href="@{/pontbascule/operations-externes}"
+           class="btn btn-secondary">Annuler</a>
+    </form>
+</div>

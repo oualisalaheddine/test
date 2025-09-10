@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <title>Opération</title>
+</head>
+<body>
+<h1>Opération</h1>
+<form th:action="${operation.id} != null ? @{'/pontbascule/operations/' + ${operation.id}} : @{/pontbascule/operations}" method="post">
+
+    <label>Produit</label>
+    <select name="produitId">
+        <option th:each="p : ${produits}"
+                th:value="${p.idProduit}"
+                th:selected="${operation.produit != null} ? ${operation.produit.idProduit} == ${p.idProduit} : false"
+                th:text="${p.designationProduit}"></option>
+    </select>
+    <label>Partenaire</label>
+    <select name="partenaireId">
+        <option th:each="pt : ${partenaires}"
+                th:value="${pt.id}"
+                th:selected="${operation.partenaire != null} ? ${operation.partenaire.id} == ${pt.id} : false"
+                th:text="${pt.raisonSociale}"></option>
+    </select>
+    <label>Type</label>
+    <select name="typeOperationId">
+        <option th:each="t : ${types}"
+                th:value="${t.id}"
+                th:selected="${operation.typeOperation != null} ? ${operation.typeOperation.id} == ${t.id} : false"
+                th:text="${t.libelle}"></option>
+    </select>
+    <label>Immatriculation</label>
+    <input type="text" name="immatriculation" th:value="${operation.immatriculation}" />
+    <label>Pesée 1</label>
+    <input type="number" name="peser1" th:value="${operation.peser1}" />
+    <label>Pesée 2</label>
+    <input type="number" name="peser2" th:value="${operation.peser2}" />
+    <label>Quantité déclarée</label>
+    <input type="number" name="qteDeclare" th:value="${operation.qteDeclare}" />
+    <label>Commentaire</label>
+    <input type="text" name="commentaire" th:value="${operation.commentaire}" />
+    
+    
+    <input type="hidden"
+       name="operationEnCoursId"
+       th:value="${operation.operationEnCoursId}" required />
+   <!--  <input type="hidden" th:field="*{operation.operationEnCoursId}" />     -->
+    <button type="submit">Enregistrer</button>
+    <a th:href="@{/pontbascule}">Retour</a>
+    </form>
+</body>
+</html>
+
+
