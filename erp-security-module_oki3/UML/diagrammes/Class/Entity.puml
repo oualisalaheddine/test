@@ -1,0 +1,162 @@
+@startuml
+
+entity "Utilisateur" as U {
+  + id : Long
+  + username : String (unique, not null)
+  + password : String (not null)
+  + nom : String (not null)
+  + prenom : String (not null)
+  + email : String (unique, not null)
+  + dateCreation : LocalDateTime
+  + derniereConnexion : LocalDateTime
+  + compteActif : boolean
+  + compteNonExpire : boolean
+  + compteNonVerrouille : boolean
+  + credentialsNonExpire : boolean
+  + roles : Set<Role>
+}
+
+entity "Permission" as P {
+  + id : Long
+  + nom : String (unique, not null)
+  + description : String
+  + nomModule : String (not null)
+  + nomAction : String (not null)
+  + urlPattern : String
+  + permissionActif : boolean
+  + niveauPriorite : Integer
+}
+
+entity "Role" as R {
+  + id : Long
+  + nom : String (unique, not null)
+  + description : String
+  + niveauHierarchie : Integer
+  + roleParent : Role
+  + rolesEnfants : Set<Role>
+  + permissions : Set<Permission>
+  + roleActif : boolean
+  + dateCreation : LocalDateTime
+}
+
+entity "UserSession" as S {
+  + id : Long
+  + sessionId : String (unique, not null)
+  + utilisateur : Utilisateur (not null)
+  + ipAddress : String
+  + userAgent : String
+  + dateCreation : LocalDateTime (not null)
+  + dateDerniereActivite : LocalDateTime
+  + dateExpiration : LocalDateTime
+  + sessionActive : boolean
+  + typeConnexion : String
+  + navigateur : String
+  + systemeExploitation : String
+  + localisation : String
+  + dureeSession : Long
+}
+
+entity "TwoFactorAuth" as TFA {
+  + id : Long
+  + utilisateur : Utilisateur (not null)
+  + secretKey : String (not null)
+  + backupCodes : String
+  + qrCodeUrl : String
+  + enabled : boolean
+  + verified : boolean
+  + methodType : MethodType (not null)
+  + phoneNumber : String
+  + emailBackup : String
+  + dateCreation : LocalDateTime (not null)
+  + dateActivation : LocalDateTime
+  + dateDerniereUtilisation : LocalDateTime
+  + tentativesEchec : Integer
+  + dateDernierEchec : LocalDateTime
+  + verrouilleJusqu : LocalDateTime
+  + codesUtilises : String
+}
+
+entity "PasswordPolicy" as PP {
+  + id : Long
+  + nomPolitique : String (unique, not null)
+  + description : String
+  + longueurMinimale : Integer
+  + longueurMaximale : Integer
+  + exigerMajuscules : boolean
+  + exigerMinuscules : boolean
+  + exigerChiffres : boolean
+  + exigerCaracteresSpeciaux : boolean
+  + caracteresSpeciauxAutorises : String
+  + interdireMotsCommuns : boolean
+  + interdireInformationsPersonnelles : boolean
+  + interdireRepetitionCaracteres : boolean
+  + maxRepetitionCaracteres : Integer
+  + interdireSequences : boolean
+  + historiqueMotesPasse : Integer
+  + dureeValiditeJours : Integer
+  + avertissementExpirationJours : Integer
+  + tentativesMaxEchec : Integer
+  + dureeVerrouillageMintes : Integer
+  + politiqueActive : boolean
+  + politiqueParDefaut : boolean
+  + dateCreation : LocalDateTime
+  + dateModification : LocalDateTime
+  + creePar : String
+  + modifiePar : String
+}
+
+entity "AuditLog" as A {
+  + id : Long
+  + utilisateurId : Long
+  + username : String
+  + action : String (not null)
+  + ressource : String
+  + ressourceId : Long
+  + details : String
+  + ipAddress : String
+  + userAgent : String
+  + sessionId : String
+  + dateAction : LocalDateTime (not null)
+  + niveau : NiveauAudit (not null)
+  + categorie : CategorieAudit (not null)
+  + succes : boolean
+  + messageErreur : String
+}
+
+' Relations
+R --{ P : "permissions"
+U --{ R : "roles"
+U ||--o{ S : "sessions"
+U ||--o| TFA : "twoFactorAuth"
+R ||--|{ R : "roleParent / rolesEnfants"
+
+' Notes pour les enums
+note top of TFA
+  MethodType:
+  - TOTP
+  - SMS
+  - EMAIL
+  - BACKUP_CODES
+end note
+
+note top of A
+  NiveauAudit:
+  - INFO
+  - WARNING
+  - ERROR
+  - CRITICAL
+  
+  CategorieAudit:
+  - AUTHENTICATION
+  - AUTHORIZATION
+  - DATA_ACCESS
+  - DATA_MODIFICATION
+  - SYSTEM_CONFIG
+  - SECURITY_EVENT
+  - USER_MANAGEMENT
+  - ROLE_MANAGEMENT
+  - PERMISSION_MANAGEMENT
+  - SESSION_MANAGEMENT
+end note
+
+@enduml
