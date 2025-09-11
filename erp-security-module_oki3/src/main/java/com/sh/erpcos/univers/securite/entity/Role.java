@@ -36,7 +36,7 @@ public class Role {
     @OneToMany(mappedBy = "roleParent", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private Set<Role> rolesEnfants = new HashSet<>();
     
-    @ManyToMany(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinTable(
         name = "role_permissions",
         joinColumns = @JoinColumn(name = "role_id"),

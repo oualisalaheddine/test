@@ -8,7 +8,9 @@ import lombok.AllArgsConstructor;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "user_sessions")
+@Table(name = "user_sessions" , indexes = {
+	    @Index(name = "idx_date_expiration", columnList = "date_expiration")
+	})
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -21,7 +23,7 @@ public class UserSession {
     @Column(name = "session_id", unique = true, nullable = false, length = 100)
     private String sessionId;
     
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY , cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinColumn(name = "utilisateur_id", nullable = false)
     private Utilisateur utilisateur;
     

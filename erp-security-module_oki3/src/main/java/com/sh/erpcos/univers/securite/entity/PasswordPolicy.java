@@ -60,8 +60,13 @@ public class PasswordPolicy {
     @Column(name = "interdire_sequences")
     private boolean interdireSequences = true; // ex: 123456, abcdef
     
+    /**
+    pas de table d’historique des mots de passe pour le moment
+    pour appliquer ce contrôle il faut stocker séparément les anciens mots de passe 
+    dans la table prévue pour la prochaine version.
+    **/
     @Column(name = "historique_mots_passe")
-    private Integer historiqueMotesPasse = 5; // nombre de derniers mots de passe à retenir
+    private Integer historiqueMotesPasse = 5; // nombre de derniers mots de passe à retenir  
     
     @Column(name = "duree_validite_jours")
     private Integer dureeValiditeJours = 90; // 0 = pas d'expiration
