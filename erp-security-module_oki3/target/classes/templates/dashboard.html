@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - ERP Security</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    
+    <style>
+        .stats-card {
+            background: white;
+            border-radius: 1rem;
+            padding: 1.5rem;
+            box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+            border: none;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        
+        .stats-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+        }
+        
+        .stats-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: white;
+            margin-bottom: 1rem;
+        }
+        
+        .stats-number {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+        
+        .stats-label {
+            color: #6c757d;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+        
+        .module-card {
+            background: white;
+            border-radius: 1rem;
+            padding: 1.5rem;
+            box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+            border: none;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            color: inherit;
+            display: block;
+        }
+        
+        .module-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+            text-decoration: none;
+            color: inherit;
+        }
+        
+        .module-icon {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            color: white;
+            margin: 0 auto 1rem;
+        }
+        
+        .module-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            text-align: center;
+        }
+        
+        .module-description {
+            color: #6c757d;
+            text-align: center;
+            font-size: 0.875rem;
+        }
+        
+        .welcome-section {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 1rem;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+        
+        .welcome-title {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+        
+        .welcome-subtitle {
+            opacity: 0.9;
+            font-size: 1.1rem;
+        }
+        
+        .permissions-list {
+            background: white;
+            border-radius: 1rem;
+            padding: 1.5rem;
+            box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+        }
+        
+        .permission-badge {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 1rem;
+            font-size: 0.75rem;
+            margin: 0.25rem;
+            display: inline-block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <nav class="col-md-3 col-lg-2 d-md-block bg-dark sidebar collapse" style="min-height: 100vh;">
+                <div class="position-sticky pt-3">
+                    <div class="text-center mb-4">
+                        <h4 class="text-white">ERP Security</h4>
+                        <small class="text-white-50">Gestion des accès</small>
+                    </div>
+                    
+                    <ul class="nav flex-column">
+                        <li class="nav-item">
+                            <a class="nav-link active text-white" href="#">
+                                <i class="bi bi-speedometer2"></i>
+                                Dashboard
+                            </a>
+                        </li>
+                        
+                        <!-- Module Sécurité -->
+                        <li class="nav-item" sec:authorize="hasAuthority('SECURITE_LIRE')">
+                            <a class="nav-link text-white-50" th:href="@{/securite}">
+                                <i class="bi bi-shield-lock"></i>
+                                Sécurité
+                            </a>
+                        </li>
+                        
+                        <!-- Module Contact -->
+                        <li class="nav-item" sec:authorize="hasAuthority('CONTACT_LIRE')">
+                            <a class="nav-link text-white-50" th:href="@{/contact}">
+                                <i class="bi bi-person-lines-fill"></i>
+                                Contacts
+                            </a>
+                        </li>
+                        
+                        <!-- Module Comptabilité -->
+                        <li class="nav-item" sec:authorize="hasAuthority('COMPTABILITE_LIRE')">
+                            <a class="nav-link text-white-50" th:href="@{/comptabilite}">
+                                <i class="bi bi-calculator"></i>
+                                Comptabilité
+                            </a>
+                        </li>
+                        
+                        <!-- Module RH -->
+                        <li class="nav-item" sec:authorize="hasAuthority('RH_LIRE')">
+                            <a class="nav-link text-white-50" th:href="@{/rh}">
+                                <i class="bi bi-people-fill"></i>
+                                Ressources Humaines
+                            </a>
+                        </li>
+                        
+                        <!-- Module Stock -->
+                        <li class="nav-item" sec:authorize="hasAuthority('STOCK_LIRE')">
+                            <a class="nav-link text-white-50" th:href="@{/stock}">
+                                <i class="bi bi-box-seam"></i>
+                                Stock
+                            </a>
+                        </li>
+                        
+                        <!-- Module Vente -->
+                        <li class="nav-item" sec:authorize="hasAuthority('VENTE_LIRE')">
+                            <a class="nav-link text-white-50" th:href="@{/vente}">
+                                <i class="bi bi-cart-check"></i>
+                                Ventes
+                            </a>
+                        </li>
+                        
+                        <!-- Module Achat -->
+                        <li class="nav-item" sec:authorize="hasAuthority('ACHAT_LIRE')">
+                            <a class="nav-link text-white-50" th:href="@{/achat}">
+                                <i class="bi bi-cart-plus"></i>
+                                Achats
+                            </a>
+                        </li>
+                    </ul>
+                    
+                    <hr class="text-white-50">
+                    
+                    <!-- Sous-menu Sécurité -->
+                    <div sec:authorize="hasAuthority('SECURITE_LIRE')">
+                        <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-white-50">
+                            <span>Gestion Sécurité</span>
+                        </h6>
+                        <ul class="nav flex-column mb-2">
+                            <li class="nav-item">
+                                <a class="nav-link text-white-50" th:href="@{/securite/utilisateurs}">
+                                    <i class="bi bi-person-badge"></i>
+                                    Utilisateurs
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-white-50" th:href="@{/securite/roles}">
+                                    <i class="bi bi-person-gear"></i>
+                                    Rôles
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-white-50" th:href="@{/securite/permissions}">
+                                    <i class="bi bi-key"></i>
+                                    Permissions
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                  </div>
+            </nav>
+            
+            <!-- Main content -->
+            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4" style="background-color: #f8f9fa; min-height: 100vh;">
+                <!-- Top navbar -->
+                <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm mb-4">
+                    <div class="container-fluid">
+                        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#sidebar">
+                            <span class="navbar-toggler-icon"></span>
+                        </button>
+                        
+                        <div class="navbar-nav ms-auto">
+                            <div class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
+                                    <i class="bi bi-person-circle"></i>
+                                    <span sec:authentication="name">Utilisateur</span>
+                                </a>
+                                <ul class="dropdown-menu">
+                                    <li><a class="dropdown-item" href="#"><i class="bi bi-person"></i> Profil</a></li>
+                                    <li><a class="dropdown-item" href="#"><i class="bi bi-gear"></i> Paramètres</a></li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li>
+                                        <form th:action="@{/logout}" method="post" class="d-inline">
+                                       
+                                            <button type="submit" class="dropdown-item">
+                                                <i class="bi bi-box-arrow-right"></i> Déconnexion
+                                            </button>
+                                        </form>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </nav>
+                
+                <!-- Welcome Section -->
+                <div class="welcome-section">
+                    <h1 class="welcome-title">Bienvenue, <span sec:authentication="name">Utilisateur</span> !</h1>
+                    <p class="welcome-subtitle">Voici un aperçu de votre tableau de bord ERP Security</p>
+                </div>
+                
+                <!-- Statistics Cards -->
+                <div class="row mb-4">
+                    <div class="col-xl-3 col-md-6 mb-4">
+                        <div class="stats-card">
+                            <div class="stats-icon" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                                <i class="bi bi-person-badge"></i>
+                            </div>
+                            <div class="stats-number">0</div>
+                            <div class="stats-label">Utilisateurs Actifs</div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-xl-3 col-md-6 mb-4">
+                        <div class="stats-card">
+                            <div class="stats-icon" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                                <i class="bi bi-person-gear"></i>
+                            </div>
+                            <div class="stats-number">0</div>
+                            <div class="stats-label">Rôles Créés</div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-xl-3 col-md-6 mb-4">
+                        <div class="stats-card">
+                            <div class="stats-icon" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+                                <i class="bi bi-key"></i>
+                            </div>
+                            <div class="stats-number">0</div>
+                            <div class="stats-label">Permissions Actives</div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-xl-3 col-md-6 mb-4">
+                        <div class="stats-card">
+                            <div class="stats-icon" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);">
+                                <i class="bi bi-shield-check"></i>
+                            </div>
+                            <div class="stats-number">8</div>
+                            <div class="stats-label">Modules Disponibles</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Modules Grid -->
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <h4 class="mb-3">Modules ERP</h4>
+                    </div>
+                    
+                    <!-- Module Sécurité -->
+                    <div class="col-lg-3 col-md-4 col-sm-6 mb-4" sec:authorize="hasAuthority('SECURITE_LIRE')">
+                        <a th:href="@{/securite}" class="module-card">
+                            <div class="module-icon" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                                <i class="bi bi-shield-lock"></i>
+                            </div>
+                            <h5 th:class="module-title">Sécurité</h5>
+                            <p class="module-description">Gestion des utilisateurs, rôles et permissions</p>
+                        </a>
+                    </div>
+                    
+                    <!-- Module Contact -->
+                    <div class="col-lg-3 col-md-4 col-sm-6 mb-4" sec:authorize="hasAuthority('CONTACT_LIRE')">
+                        <a th:href="@{/contact}" class="module-card">
+                            <div class="module-icon" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                                <i class="bi bi-person-lines-fill"></i>
+                            </div>
+                            <h5 class="module-title">Contacts</h5>
+                            <p class="module-description">Gestion des contacts et clients</p>
+                        </a>
+                    </div>
+                    
+                    <!-- Module Comptabilité -->
+                    <div class="col-lg-3 col-md-4 col-sm-6 mb-4" sec:authorize="hasAuthority('COMPTABILITE_LIRE')">
+                        <a th:href="@{/comptabilite}" class="module-card">
+                            <div class="module-icon" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+                                <i class="bi bi-calculator"></i>
+                            </div>
+                            <h5 class="module-title">Comptabilité</h5>
+                            <p class="module-description">Gestion comptable et financière</p>
+                        </a>
+                    </div>
+                    
+                    <!-- Module RH -->
+                    <div class="col-lg-3 col-md-4 col-sm-6 mb-4" sec:authorize="hasAuthority('RH_LIRE')">
+                        <a th:href="@{/rh}" class="module-card">
+                            <div class="module-icon" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);">
+                                <i class="bi bi-people-fill"></i>
+                            </div>
+                            <h5 class="module-title">Ressources Humaines</h5>
+                            <p class="module-description">Gestion du personnel et des congés</p>
+                        </a>
+                    </div>
+                    
+                    <!-- Module Stock -->
+                    <div class="col-lg-3 col-md-4 col-sm-6 mb-4" sec:authorize="hasAuthority('STOCK_LIRE')">
+                        <a th:href="@{/stock}" class="module-card">
+                            <div class="module-icon" style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);">
+                                <i class="bi bi-box-seam"></i>
+                            </div>
+                            <h5 class="module-title">Stock</h5>
+                            <p class="module-description">Gestion des stocks et inventaires</p>
+                        </a>
+                    </div>
+                    
+                    <!-- Module Vente -->
+                    <div class="col-lg-3 col-md-4 col-sm-6 mb-4" sec:authorize="hasAuthority('VENTE_LIRE')">
+                        <a th:href="@{/vente}" class="module-card">
+                            <div class="module-icon" style="background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);">
+                                <i class="bi bi-cart-check"></i>
+                            </div>
+                            <h5 class="module-title">Ventes</h5>
+                            <p class="module-description">Gestion des ventes et facturation</p>
+                        </a>
+                    </div>
+                    
+                    <!-- Module Achat -->
+                    <div class="col-lg-3 col-md-4 col-sm-6 mb-4" sec:authorize="hasAuthority('ACHAT_LIRE')">
+                        <a th:href="@{/achat}" class="module-card">
+                            <div class="module-icon" style="background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);">
+                                <i class="bi bi-cart-plus"></i>
+                            </div>
+                            <h5 class="module-title">Achats</h5>
+                            <p class="module-description">Gestion des achats et fournisseurs</p>
+                        </a>
+                    </div>
+                </div>
+                
+                   <!-- Footer ou section d'information -->
+<div class="system-info mt-4 small text-muted">
+      <p>Heure du serveur: <span th:text="${#dates.format(serverTime, 'dd-MM-yyyy HH:mm:ss')}">Date et heure</span></p>
+</div>
+                
+                <!-- Permissions Section
+                <div class="row">
+                    <div class="col-12">
+                        <div class="permissions-list">
+                            <h5 class="mb-3">
+                                <i class="bi bi-key"></i>
+                                Vos Permissions
+                            </h5>
+                            
+                            <div th:if="${authorities and !authorities.isEmpty()}">
+                                <span th:each="authority : ${authorities}" 
+                                      class="permission-badge" 
+                                      th:text="${authority.authority}">
+                                    PERMISSION
+                                </span>
+                            </div>
+                            <div th:unless="${authorities and !authorities.isEmpty()}" class="text-muted">
+                                Aucune permission spécifique attribuée.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                 -->
+            </main>
+        </div>
+    </div>
+ 
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

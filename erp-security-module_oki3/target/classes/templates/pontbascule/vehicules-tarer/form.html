@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Nouveau Véhicule Taré</title>
+    <link rel="stylesheet" th:href="@{/css/bootstrap.min.css}" />
+    <link rel="stylesheet" th:href="@{/select2/css/select2.min.css}"/>
+</head>
+<body>
+    <div class="container mt-4">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h5>Création d'un nouveau véhicule taré</h5>
+            </div>
+            <div class="card-body">
+                <form th:action="@{/pontbascule/vehicules-tarer}" th:object="${vehiculeTarer}" method="post">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label for="immatriculation" class="form-label">Immatriculation</label>
+                            <input type="text" class="form-control" id="immatriculation"
+                                   th:field="*{immatriculation}" required>
+                            <div class="text-danger" th:if="${#fields.hasErrors('immatriculation')}"
+                                 th:errors="*{immatriculation}"></div>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="peser1" class="form-label">Pesée 1 (kg)</label>
+                            <input type="number" class="form-control" id="peser1"
+                                   th:field="*{peser1}" min="1" required>
+                            <div class="text-danger" th:if="${#fields.hasErrors('peser1')}"
+                                 th:errors="*{peser1}"></div>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="tareDate" class="form-label">Date de Tarage</label>
+                            <input type="date" class="form-control" id="tareDate"
+                                   th:field="*{tareDate}">
+                        </div>
+                    </div>
+
+                    <div class="mt-4">
+                        <button type="submit" class="btn btn-primary">Enregistrer</button>
+                        <a th:href="@{/pontbascule/operations-internes/nouveau}" class="btn btn-secondary">Annuler</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script th:src="@{/js/jquery-3.7.1.min.js}"></script>
+    <script th:src="@{/js/bootstrap.bundle.min.js}"></script>
+</body>
+</html>

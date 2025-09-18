@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Opérations Internes / Externes</title>
+    <link rel="stylesheet" th:href="@{/css/bootstrap.min.css}" />
+    <style>
+        .split { display:flex; flex-direction:column; height:90vh; border:1px solid #dee2e6; }
+        .pane  { overflow:auto; padding:0.5rem; }
+        .gutter{ background:#e9ecef; height:6px; cursor:row-resize; }
+        .table th,.table td{ white-space:nowrap; }
+    </style>
+</head>
+<body>
+<div class="container-fluid mt-3">
+
+    <!-- ==================== SPLIT PANEL ==================== -->
+    <div id="split" class="split">
+
+        <!-- ---------- HAUT – Opérations Internes ---------- -->
+        <div class="pane bg-light">
+            <h3>Liste des Opérations Internes</h3>
+
+            <!-- Bouton qui ouvre la modal interne -->
+            <button type="button"
+                    class="btn btn-primary mb-2"
+                    data-bs-toggle="modal"
+                    data-bs-target="#opInterneModal"
+                    th:data-url="@{/pontbascule/operations-internes/nouveau}">
+                Nouvelle Opération
+            </button>
+
+            <table class="table table-sm table-bordered">
+                <thead class="thead-light">
+                <tr>
+                    <th>ID</th><th>Immatriculation</th><th>Peser1</th><th>Actions</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="opInt : ${operationsInternes}">
+                    <td th:text="${opInt.id}"></td>
+                    <td th:text="${opInt.vehiculeTarer?.immatriculation ?: 'Non défini'}"></td>
+                    <td th:text="${opInt.vehiculeTarer?.peser1 ?: 'Non défini'}"></td>
+                    <td>
+                        <a th:href="@{/pontbascule/operations-internes/{id}/modifier(id=${opInt.id})}"
+                           class="btn btn-warning btn-sm">Modifier</a>
+                        <a th:href="@{/pontbascule/operations/nouveau(operationInterneId=${opInt.id})}"
+                           class="btn btn-primary btn-sm">Continuer</a>
+                        <form th:action="@{/pontbascule/operations-internes/{id}/supprimer(id=${opInt.id})}"
+                              method="post" class="d-inline">
+                            <button type="submit" class="btn btn-danger btn-sm">Supprimer</button>
+                        </form>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- ---------- BAS – Opérations Externes ---------- -->
+        <div class="pane bg-white">
+            <h3>Liste des Opérations Externes</h3>
+
+            <!-- Bouton qui ouvre la modal externe -->
+            <button type="button"
+                    class="btn btn-primary mb-2"
+                    data-bs-toggle="modal"
+                    data-bs-target="#opExterneModal"
+                    th:data-url="@{/pontbascule/operations-externes/nouveau}">
+                Nouvelle Opération Externe
+            </button>
+
+            <table class="table table-sm table-bordered">
+                <thead class="thead-light">
+                <tr>
+                    <th>ID</th><th>Immatriculation</th><th>Peser1</th><th>Actions</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="opExt : ${operationsExternes}">
+                    <td th:text="${opExt.id}"></td>
+                    <td th:text="${opExt.vehiculeExterne?.immatriculation ?: 'Non défini'}"></td>
+                    <td th:text="${opExt.peser1 ?: 'Non défini'}"></td>
+                    <td>
+                        <a th:href="@{/pontbascule/operations-externes/{id}/modifier(id=${opExt.id})}"
+                           class="btn btn-warning btn-sm">Modifier</a>
+                        <form th:action="@{/pontbascule/operations-externes/{id}/supprimer(id=${opExt.id})}"
+                              method="post" class="d-inline">
+                            <button type="submit" class="btn btn-danger btn-sm">Supprimer</button>
+                        </form>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+    </div> <!-- /#split -->
+</div>
+
+<!-- ==================== MODALS ==================== -->
+<!-- 1️⃣ Modal interne -->
+<div class="modal fade" id="opInterneModal" tabindex="-1"
+     aria-labelledby="opInterneModalLabel" aria-hidden="true"
+     data-bs-backdrop="static">
+    <div class="modal-dialog modal-xl modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="opInterneModalLabel">Nouvelle Opération Interne</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"
+                        aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="opInterneBody">
+                <!-- le fragment du formulaire sera injecté ici -->
+                <div class="text-center py-5"><div class="spinner-border text-primary"></div></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 2️⃣ Modal externe -->
+<div class="modal fade" id="opExterneModal" tabindex="-1"
+     aria-labelledby="opExterneModalLabel" aria-hidden="true"
+     data-bs-backdrop="static">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="opExterneModalLabel">Nouvelle Opération Externe</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"
+                        aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="opExterneBody">
+                <div class="text-center py-5"><div class="spinner-border text-primary"></div></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ==================== SCRIPTS ==================== -->
+<script src="https://cdn.jsdelivr.net/npm/split.js@1.6.0/dist/split.min.js"></script>
+<script th:src="@{/js/jquery-3.7.1.min.js}"></script>
+<script th:src="@{/js/bootstrap.bundle.min.js}"></script>
+<script th:src="@{/select2/js/select2.min.js}"></script>
+
+<script>
+    // ---------- Split.js ----------
+    Split(['#split > .pane:nth-child(1)', '#split > .pane:nth-child(2)'], {
+        direction: 'vertical',
+        sizes: [50, 50],
+        minSize: 100,
+        gutterSize: 6,
+        cursor: 'row-resize',
+        gutter: function (i, dir) {
+            const g = document.createElement('div');
+            g.className = 'gutter';
+            return g;
+        }
+    });
+
+    // ---------- Chargement du formulaire dans les modals ----------
+  $(function () {
+
+    // -------------------------------------------------------------
+    //  Charge le fragment et (re)initialise les widgets Select2
+    // -------------------------------------------------------------
+    function loadForm(url, targetBody) {
+        // 1️⃣  Spinner pendant le chargement
+        $(targetBody).html(
+            '<div class="text-center py-5"><div class="spinner-border text-primary"></div></div>'
+        );
+
+        // 2️⃣  Requête AJAX vers le contrôleur
+        $.get(url, function (html) {
+            // 3️⃣  Injecte le fragment dans la modal
+            $(targetBody).html(html);
+
+            // 4️⃣  (Re)initialise SELECT2 sur les deux champs possibles
+            //     (le champ présent dépend du fragment chargé)
+            $('#vehiculeTarer, #vehiculeExterne').select2({
+                placeholder: "Choisir un véhicule",
+                allowClear: true,
+                dropdownParent: $(targetBody).closest('.modal')   // le dropdown reste dans la modal
+            });
+
+            // 5️⃣  Met le focus directement dans le champ de recherche
+            //     (facultatif – reproduit le comportement que vous aviez)
+            $('.select2-search__field').first().focus();
+        }).fail(function () {
+            $(targetBody).html('<div class="alert alert-danger">Erreur de chargement.</div>');
+        });
+    }
+
+    // ------------------- MODAL INTERNE -------------------------
+    $('#opInterneModal').on('show.bs.modal', function (e) {
+        const url = $(e.relatedTarget).data('url');   // récupère le data‑url du bouton
+        loadForm(url, '#opInterneBody');
+    });
+
+    // ------------------- MODAL EXTERNE -------------------------
+    $('#opExterneModal').on('show.bs.modal', function (e) {
+        const url = $(e.relatedTarget).data('url');
+        loadForm(url, '#opExterneBody');
+    });
+
+    // ----------------------------------------------------------------
+    // Nettoyage : on vide le corps lorsqu’on ferme la modal (evite
+    // les doublons si l’on rouvre plusieurs fois)
+    // ----------------------------------------------------------------
+    $('#opInterneModal, #opExterneModal').on('hidden.bs.modal', function () {
+        $(this).find('.modal-body').empty();
+    });
+});
+</script>
+</body>
+</html>

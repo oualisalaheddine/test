@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <title>Tableau de Bord - Sécurité</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        .dashboard-header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 2rem 0; margin-bottom: 2rem; }
+        .stat-card { transition: transform 0.2s; }
+        .stat-card:hover { transform: translateY(-5px); }
+        .alert-card { border-left: 4px solid; }
+        .alert-warning { border-left-color: #ffc107; }
+        .alert-danger { border-left-color: #dc3545; }
+        .alert-info { border-left-color: #17a2b8; }
+        .activity-item { border-left: 3px solid #007bff; padding-left: 15px; margin-bottom: 10px; }
+        .activity-success { border-left-color: #28a745; }
+        .activity-error { border-left-color: #dc3545; }
+        .module-badge { background: linear-gradient(45deg, #007bff, #0056b3); color: white; }
+        .metric-card { background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <div class="dashboard-header">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h1 class="mb-0"><i class="fas fa-shield-alt me-3"></i>Tableau de Bord - Sécurité</h1>
+                    <p class="mb-0 mt-2">Vue d'ensemble de la sécurité du système</p>
+                </div>
+                <div class="col-md-4 text-end">
+                    <a th:href="@{/dashboard}" class="btn btn-light">
+                        <i class="fas fa-arrow-left me-2"></i>Retour au Dashboard Principal
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container-fluid">
+        <!-- Alertes de sécurité -->
+        <div th:if="${alertes != null and !alertes.empty}" class="row mb-4">
+            <div class="col-12">
+                <h4><i class="fas fa-exclamation-triangle text-warning me-2"></i>Alertes de Sécurité</h4>
+                <div th:each="alerte : ${alertes}" class="alert alert-card" th:classappend="'alert-' + ${alerte.type}">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <strong th:text="${alerte.titre}"></strong>
+                            <p class="mb-0" th:text="${alerte.message}"></p>
+                        </div>
+                        <small th:text="${#temporals.format(alerte.timestamp, 'HH:mm')}"></small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Statistiques principales -->
+        <div class="row mb-4">
+            <div class="col-lg-3 col-md-6 mb-3">
+                <div class="card stat-card h-100">
+                    <div class="card-body text-center">
+                        <i class="fas fa-users fa-3x text-primary mb-3"></i>
+                        <h2 class="text-primary" th:text="${nombreUtilisateurs}">0</h2>
+                        <h6 class="text-muted">Utilisateurs</h6>
+                        <small class="text-success">
+                            <i class="fas fa-check-circle me-1"></i>
+                            <span th:text="${nombreUtilisateursActifs}"></span> actifs
+                        </small>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-3 col-md-6 mb-3">
+                <div class="card stat-card h-100">
+                    <div class="card-body text-center">
+                        <i class="fas fa-key fa-3x text-warning mb-3"></i>
+                        <h2 class="text-warning" th:text="${nombreRoles}">0</h2>
+                        <h6 class="text-muted">Rôles</h6>
+                        <small class="text-success">
+                            <i class="fas fa-check-circle me-1"></i>
+                            <span th:text="${nombreRolesActifs}"></span> actifs
+                        </small>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-3 col-md-6 mb-3">
+                <div class="card stat-card h-100">
+                    <div class="card-body text-center">
+                        <i class="fas fa-shield-alt fa-3x text-success mb-3"></i>
+                        <h2 class="text-success" th:text="${nombrePermissions}">0</h2>
+                        <h6 class="text-muted">Permissions</h6>
+                        <small class="text-success">
+                            <i class="fas fa-check-circle me-1"></i>
+                            <span th:text="${nombrePermissionsActives}"></span> actives
+                        </small>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-3 col-md-6 mb-3">
+                <div class="card stat-card h-100">
+                    <div class="card-body text-center">
+                        <i class="fas fa-user-shield fa-3x text-info mb-3"></i>
+                        <h2 class="text-info" th:text="${utilisateurs2FA}">0</h2>
+                        <h6 class="text-muted">2FA Activé</h6>
+                        <small class="text-info">
+                            <i class="fas fa-lock me-1"></i>
+                            Authentification renforcée
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Métriques avancées -->
+        <div class="row mb-4">
+            <div class="col-lg-3 col-md-6 mb-3">
+                <div class="card metric-card h-100">
+                    <div class="card-body text-center">
+                        <i class="fas fa-sign-in-alt fa-2x text-primary mb-2"></i>
+                        <h4 class="text-primary" th:text="${sessionsActives}">0</h4>
+                        <h6 class="text-muted">Sessions Actives</h6>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-3 col-md-6 mb-3">
+                <div class="card metric-card h-100">
+                    <div class="card-body text-center">
+                        <i class="fas fa-history fa-2x text-info mb-2"></i>
+                        <h4 class="text-info" th:text="${auditLogsAujourdhui}">0</h4>
+                        <h6 class="text-muted">Actions Aujourd'hui</h6>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-3 col-md-6 mb-3">
+                <div class="card metric-card h-100">
+                    <div class="card-body text-center">
+                        <i class="fas fa-exclamation-circle fa-2x text-danger mb-2"></i>
+                        <h4 class="text-danger" th:text="${auditLogsEchecs}">0</h4>
+                        <h6 class="text-muted">Échecs Aujourd'hui</h6>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-3 col-md-6 mb-3">
+                <div class="card metric-card h-100">
+                    <div class="card-body text-center">
+                        <i class="fas fa-database fa-2x text-secondary mb-2"></i>
+                        <h4 class="text-secondary" th:text="${sauvegardesRecentes.size()}">0</h4>
+                        <h6 class="text-muted">Sauvegardes Récentes</h6>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- Actions rapides -->
+            <div class="col-lg-8 mb-4">
+                <div class="card h-100">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="fas fa-bolt me-2"></i>Actions Rapides</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <div class="d-grid">
+                                    <a th:href="@{/securite/utilisateurs}" class="btn btn-primary">
+                                        <i class="fas fa-users me-2"></i>Gérer les Utilisateurs
+                                    </a>
+                                </div>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <div class="d-grid">
+                                    <a th:href="@{/securite/roles}" class="btn btn-warning">
+                                        <i class="fas fa-key me-2"></i>Gérer les Rôles
+                                    </a>
+                                </div>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <div class="d-grid">
+                                    <a th:href="@{/securite/permissions}" class="btn btn-success">
+                                        <i class="fas fa-shield-alt me-2"></i>Gérer les Permissions
+                                    </a>
+                                </div>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <div class="d-grid">
+                                    <a th:href="@{/securite/audit}" class="btn btn-info">
+                                        <i class="fas fa-history me-2"></i>Logs d'Audit
+                                    </a>
+                                </div>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <div class="d-grid">
+                                    <a th:href="@{/securite/sessions}" class="btn btn-secondary">
+                                        <i class="fas fa-sign-in-alt me-2"></i>Gestion des Sessions
+                                    </a>
+                                </div>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <div class="d-grid">
+                                    <a th:href="@{/securite/2fa}" class="btn btn-dark">
+                                        <i class="fas fa-user-shield me-2"></i>Authentification 2FA
+                                    </a>
+                                </div>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <div class="d-grid">
+                                    <a th:href="@{/pontbascule}" class="btn btn-primary">
+                                        <i class="fas fa-weight me-2"></i>Pont Bascule
+                                    </a>
+                                </div>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <div class="d-grid">
+                                    <a th:href="@{/comptabilite}" class="btn btn-success">
+                                        <i class="fas fa-calculator me-2"></i>Comptabilité
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Activité récente -->
+            <div class="col-lg-4 mb-4">
+                <div class="card h-100">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="fas fa-clock me-2"></i>Activité Récente</h5>
+                    </div>
+                    <div class="card-body" style="max-height: 400px; overflow-y: auto;">
+                        <div th:if="${activiteRecente != null and !activiteRecente.empty}">
+                            <div th:each="activite : ${activiteRecente}" class="activity-item" th:classappend="${activite.succes} ? 'activity-success' : 'activity-error'">
+                                <div class="d-flex justify-content-between">
+                                    <div>
+                                        <strong th:text="${activite.utilisateur}"></strong>
+                                        <br>
+                                        <small th:text="${activite.action}"></small>
+                                        <br>
+                                        <small class="text-muted" th:text="${activite.ressource}"></small>
+                                    </div>
+                                    <small class="text-muted" th:text="${#temporals.format(activite.timestamp, 'HH:mm')}"></small>
+                                </div>
+                            </div>
+                        </div>
+                        <div th:if="${activiteRecente == null or activiteRecente.empty}" class="text-center text-muted">
+                            <i class="fas fa-info-circle fa-2x mb-2"></i>
+                            <p>Aucune activité récente</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- Utilisateurs récents -->
+            <div class="col-lg-6 mb-4">
+                <div class="card h-100">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="fas fa-user-plus me-2"></i>Utilisateurs Récents</h5>
+                    </div>
+                    <div class="card-body">
+                        <div th:if="${utilisateursRecents != null and !utilisateursRecents.empty}">
+                            <div th:each="utilisateur : ${utilisateursRecents}" class="d-flex justify-content-between align-items-center border-bottom py-2">
+                                <div>
+                                    <strong th:text="${utilisateur.nom + ' ' + utilisateur.prenom}"></strong>
+                                    <br>
+                                    <small class="text-muted" th:text="'@' + ${utilisateur.username}"></small>
+                                </div>
+                                <small class="text-muted" th:text="${#temporals.format(utilisateur.dateCreation, 'dd/MM/yyyy')}"></small>
+                            </div>
+                        </div>
+                        <div th:if="${utilisateursRecents == null or utilisateursRecents.empty}" class="text-center text-muted">
+                            <i class="fas fa-users fa-2x mb-2"></i>
+                            <p>Aucun utilisateur récent</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Modules disponibles -->
+            <div class="col-lg-6 mb-4">
+                <div class="card h-100">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="fas fa-cubes me-2"></i>Modules Disponibles</h5>
+                    </div>
+                    <div class="card-body">
+                        <div th:if="${modules != null and !modules.empty}">
+                            <div th:each="module : ${modules}">
+                                <span class="badge module-badge me-2 mb-2" th:text="${module}"></span>
+                            </div>
+                        </div>
+                        <div th:if="${modules == null or modules.empty}" class="text-center text-muted">
+                            <i class="fas fa-cube fa-2x mb-2"></i>
+                            <p>Aucun module configuré</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Module Pont Bascule -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0"><i class="fas fa-weight me-2"></i>Module Pont Bascule</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <!-- Statistiques principales -->
+                            <div class="col-lg-3 col-md-6 mb-3">
+                                <div class="text-center">
+                                    <i class="fas fa-weight-hanging fa-3x text-primary mb-2"></i>
+                                    <h4 class="text-primary" th:text="${pontBasculeStats.pesagesAujourdhui}">0</h4>
+                                    <h6 class="text-muted">Pesages Aujourd'hui</h6>
+                                    <small class="text-success">
+                                        <i class="fas fa-arrow-up me-1"></i>
+                                        <span th:text="${pontBasculeStats.pesagesCetteSemaine}"></span> cette semaine
+                                    </small>
+                                </div>
+                            </div>
+                            
+                            <div class="col-lg-3 col-md-6 mb-3">
+                                <div class="text-center">
+                                    <i class="fas fa-truck fa-3x text-warning mb-2"></i>
+                                    <h4 class="text-warning" th:text="${pontBasculeStats.vehiculesEnregistres}">0</h4>
+                                    <h6 class="text-muted">Véhicules Enregistrés</h6>
+                                    <small class="text-info">
+                                        <i class="fas fa-user me-1"></i>
+                                        <span th:text="${pontBasculeStats.chauffeursActifs}"></span> chauffeurs actifs
+                                    </small>
+                                </div>
+                            </div>
+                            
+                            <div class="col-lg-3 col-md-6 mb-3">
+                                <div class="text-center">
+                                    <i class="fas fa-chart-line fa-3x text-success mb-2"></i>
+                                    <h4 class="text-success" th:text="${pontBasculeStats.poidsTotalJour}">0</h4>
+                                    <h6 class="text-muted">Poids Total Aujourd'hui</h6>
+                                    <small class="text-success">
+                                        <i class="fas fa-balance-scale me-1"></i>
+                                        Moyenne: <span th:text="${pontBasculeStats.moyennePesage}"></span>
+                                    </small>
+                                </div>
+                            </div>
+                            
+                            <div class="col-lg-3 col-md-6 mb-3">
+                                <div class="text-center">
+                                    <i class="fas fa-exclamation-triangle fa-3x text-danger mb-2"></i>
+                                    <h4 class="text-danger" th:text="${pontBasculeStats.alertesActives}">0</h4>
+                                    <h6 class="text-muted">Alertes Actives</h6>
+                                    <small class="text-success">
+                                        <i class="fas fa-check-circle me-1"></i>
+                                        Statut: <span th:text="${pontBasculeStats.statutSysteme}"></span>
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Dernière activité -->
+                        <div class="row mt-3">
+                            <div class="col-12">
+                                <div class="alert alert-info">
+                                    <i class="fas fa-clock me-2"></i>
+                                    <strong>Dernière activité:</strong> 
+                                    <span th:text="${pontBasculeStats.derniereActivite}"></span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Actions rapides Pont Bascule -->
+                        <div class="row mt-3">
+                            <div class="col-12">
+                                <h6><i class="fas fa-bolt me-2"></i>Actions Rapides - Pont Bascule</h6>
+                                <div class="btn-group" role="group">
+                                    <a th:href="@{/pontbascule}" class="btn btn-primary btn-sm">
+                                        <i class="fas fa-weight me-1"></i>Nouveau Pesage
+                                    </a>
+                                    <a th:href="@{/pontbascule/vehicules}" class="btn btn-info btn-sm">
+                                        <i class="fas fa-truck me-1"></i>Véhicules
+                                    </a>
+                                    <a th:href="@{/pontbascule/chauffeurs}" class="btn btn-warning btn-sm">
+                                        <i class="fas fa-user me-1"></i>Chauffeurs
+                                    </a>
+                                    <a th:href="@{/pontbascule/rapports}" class="btn btn-success btn-sm">
+                                        <i class="fas fa-chart-bar me-1"></i>Rapports
+                                    </a>
+                                    <a th:href="@{/pontbascule/historique}" class="btn btn-secondary btn-sm">
+                                        <i class="fas fa-history me-1"></i>Historique
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Autres modules (Comptabilité, RH, Stock, etc.) -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="fas fa-th-large me-2"></i>Autres Modules ERP</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-lg-2 col-md-4 col-sm-6 mb-3">
+                                <div class="d-grid">
+                                    <a th:href="@{/comptabilite}" class="btn btn-outline-primary">
+                                        <i class="fas fa-calculator me-2"></i>Comptabilité
+                                    </a>
+                                </div>
+                            </div>
+                            <div class="col-lg-2 col-md-4 col-sm-6 mb-3">
+                                <div class="d-grid">
+                                    <a th:href="@{/rh}" class="btn btn-outline-success">
+                                        <i class="fas fa-users me-2"></i>Ressources Humaines
+                                    </a>
+                                </div>
+                            </div>
+                            <div class="col-lg-2 col-md-4 col-sm-6 mb-3">
+                                <div class="d-grid">
+                                    <a th:href="@{/stock}" class="btn btn-outline-warning">
+                                        <i class="fas fa-boxes me-2"></i>Stock
+                                    </a>
+                                </div>
+                            </div>
+                            <div class="col-lg-2 col-md-4 col-sm-6 mb-3">
+                                <div class="d-grid">
+                                    <a th:href="@{/vente}" class="btn btn-outline-info">
+                                        <i class="fas fa-shopping-cart me-2"></i>Vente
+                                    </a>
+                                </div>
+                            </div>
+                            <div class="col-lg-2 col-md-4 col-sm-6 mb-3">
+                                <div class="d-grid">
+                                    <a th:href="@{/achat}" class="btn btn-outline-secondary">
+                                        <i class="fas fa-shopping-bag me-2"></i>Achat
+                                    </a>
+                                </div>
+                            </div>
+                            <div class="col-lg-2 col-md-4 col-sm-6 mb-3">
+                                <div class="d-grid">
+                                    <a th:href="@{/contact}" class="btn btn-outline-dark">
+                                        <i class="fas fa-address-book me-2"></i>Contact
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Statistiques par période -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="fas fa-chart-line me-2"></i>Statistiques des 7 Derniers Jours</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row text-center">
+                            <div class="col-md-3">
+                                <h4 class="text-primary" th:text="${statistiquesPeriode.actions7Jours}">0</h4>
+                                <p class="text-muted">Actions Total</p>
+                            </div>
+                            <div class="col-md-3">
+                                <h4 class="text-danger" th:text="${statistiquesPeriode.echecs7Jours}">0</h4>
+                                <p class="text-muted">Échecs</p>
+                            </div>
+                            <div class="col-md-3">
+                                <h4 class="text-info" th:text="${statistiquesPeriode.sessions7Jours}">0</h4>
+                                <p class="text-muted">Sessions</p>
+                            </div>
+                            <div class="col-md-3">
+                                <h4 class="text-success" th:text="${statistiquesPeriode.utilisateursActifs7Jours}">0</h4>
+                                <p class="text-muted">Utilisateurs Actifs</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Auto-refresh des alertes toutes les 30 secondes
+        setInterval(function() {
+            location.reload();
+        }, 30000);
+    </script>
+</body>
+</html>

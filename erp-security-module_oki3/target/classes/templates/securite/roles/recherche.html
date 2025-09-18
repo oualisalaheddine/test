@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <title>Recherche de Rôles</title>
+    <link rel="stylesheet" th:href="@{/css/styles.css}" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        table { border-collapse: collapse; width: 100%; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background-color: #f4f4f4; font-weight: bold; }
+        .alert { padding: 10px; margin: 10px 0; border-radius: 4px; }
+        .alert-success { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .alert-danger { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .btn { padding: 5px 10px; margin: 2px; text-decoration: none; border-radius: 3px; display: inline-block; }
+        .btn-primary { background-color: #007bff; color: white; }
+        .btn-success { background-color: #28a745; color: white; }
+        .btn-warning { background-color: #ffc107; color: black; }
+        .btn-danger { background-color: #dc3545; color: white; }
+        .btn-sm { padding: 3px 8px; font-size: 12px; }
+        .status-active { color: #28a745; font-weight: bold; }
+        .status-inactive { color: #dc3545; font-weight: bold; }
+        .search-info { background: #e9ecef; padding: 15px; border-radius: 6px; margin-bottom: 20px; }
+    </style>
+</head>
+<body>
+    <h1>Recherche de Rôles</h1>
+
+    <div th:if="${successMessage}" class="alert alert-success" th:text="${successMessage}"></div>
+    <div th:if="${errorMessage}" class="alert alert-danger" th:text="${errorMessage}"></div>
+
+    <div class="search-info">
+        <p><strong>Recherche:</strong> "<span th:text="${recherche}"></span>"</p>
+        <p><strong>Résultats trouvés:</strong> <span th:text="${nombreResultats}"></span> rôle(s)</p>
+    </div>
+
+    <div style="margin: 20px 0;">
+        <a th:href="@{/securite/roles}" class="btn btn-primary">← Retour à la liste</a>
+        <a th:href="@{/securite/roles/nouveau}" class="btn btn-success">Nouveau Rôle</a>
+        
+        <form th:action="@{/securite/roles/recherche}" method="get" style="display:inline-block; margin-left: 20px;">
+            <input type="text" name="q" th:value="${recherche}" placeholder="Rechercher un rôle..." style="padding: 5px; width: 200px;" />
+            <button type="submit" class="btn btn-primary">Rechercher</button>
+        </form>
+    </div>
+
+    <table th:if="${!roles.empty}">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Nom</th>
+                <th>Description</th>
+                <th>Permissions</th>
+                <th>Statut</th>
+                <th>Date Création</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr th:each="role : ${roles}">
+                <td th:text="${role.id}"></td>
+                <td th:text="${role.nom}"></td>
+                <td th:text="${role.description}"></td>
+                <td>
+                    <span th:text="${role.permissions.size()}"></span> permission(s)
+                    <a th:href="@{'/securite/roles/' + ${role.id} + '/permissions'}" 
+                       class="btn btn-sm btn-primary">Gérer</a>
+                </td>
+                <td>
+                    <span th:if="${role.roleActif}" class="status-active">Actif</span>
+                    <span th:unless="${role.roleActif}" class="status-inactive">Inactif</span>
+                </td>
+                <td th:text="${#temporals.format(role.dateCreation, 'dd/MM/yyyy HH:mm')}"></td>
+                <td>
+                    <a th:href="@{'/securite/roles/' + ${role.id}}" class="btn btn-sm btn-primary">Voir</a>
+                    <a th:href="@{'/securite/roles/' + ${role.id} + '/modifier'}" class="btn btn-sm btn-warning">Modifier</a>
+                    
+                    <form th:action="@{'/securite/roles/' + ${role.id} + '/activer'}" method="post" style="display:inline-block;" th:if="${!role.roleActif}">
+                        <button type="submit" class="btn btn-sm btn-success">Activer</button>
+                    </form>
+                    
+                    <form th:action="@{'/securite/roles/' + ${role.id} + '/desactiver'}" method="post" style="display:inline-block;" th:if="${role.roleActif}">
+                        <button type="submit" class="btn btn-sm btn-warning">Désactiver</button>
+                    </form>
+                    
+                    <form th:action="@{'/securite/roles/' + ${role.id} + '/supprimer'}" method="post" style="display:inline-block;">
+                        <button type="submit" class="btn btn-sm btn-danger" 
+                                onclick="return confirm('Êtes-vous sûr de vouloir supprimer ce rôle ?')">Supprimer</button>
+                    </form>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+
+    <div th:if="${roles.empty}" style="text-align: center; margin: 40px 0; color: #666;">
+        <p>Aucun rôle trouvé pour la recherche "<span th:text="${recherche}"></span>".</p>
+        <p>Essayez avec d'autres termes de recherche.</p>
+    </div>
+
+    <div style="margin-top: 30px;">
+        <a th:href="@{/securite/utilisateurs}" class="btn btn-primary">← Retour aux Utilisateurs</a>
+        <a th:href="@{/securite/permissions}" class="btn btn-primary">Gérer les Permissions</a>
+    </div>
+
+</body>
+</html>

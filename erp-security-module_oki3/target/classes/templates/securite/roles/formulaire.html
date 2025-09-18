@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <title th:text="${titre}">Rôle</title>
+    <link rel="stylesheet" th:href="@{/css/styles.css}" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        .form-container { max-width: 800px; margin: 0 auto; padding: 20px; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; }
+        input[type="text"], input[type="email"], textarea, select { 
+            width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; 
+        }
+        textarea { height: 80px; resize: vertical; }
+        .btn { padding: 10px 20px; margin: 5px; text-decoration: none; border-radius: 4px; display: inline-block; border: none; cursor: pointer; }
+        .btn-primary { background-color: #007bff; color: white; }
+        .btn-secondary { background-color: #6c757d; color: white; }
+        .permissions-section { margin-top: 20px; }
+        .permission-group { margin-bottom: 15px; }
+        .permission-item { margin: 5px 0; }
+        .permission-item input[type="checkbox"] { margin-right: 8px; }
+        .alert { padding: 10px; margin: 10px 0; border-radius: 4px; }
+        .alert-danger { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+    </style>
+</head>
+<body>
+    <div class="form-container">
+        <h1 th:text="${titre}">Rôle</h1>
+
+        <div th:if="${errorMessage}" class="alert alert-danger" th:text="${errorMessage}"></div>
+
+        <form th:object="${role}"
+              th:action="${role.id} != null ? @{'/securite/roles/' + ${role.id} + '/modifier'} : @{/securite/roles/nouveau}"
+              method="post">
+            
+            <div class="form-group">
+                <label for="nom">Nom du Rôle *</label>
+                <input type="text" id="nom" th:field="*{nom}" required />
+                <div th:if="${#fields.hasErrors('nom')}" th:errors="*{nom}" style="color: red;"></div>
+            </div>
+
+            <div class="form-group">
+                <label for="description">Description</label>
+                <textarea id="description" th:field="*{description}" placeholder="Description du rôle..."></textarea>
+                <div th:if="${#fields.hasErrors('description')}" th:errors="*{description}" style="color: red;"></div>
+            </div>
+
+            <div class="form-group">
+                <label>
+                    <input type="checkbox" th:field="*{roleActif}" />
+                    Rôle actif
+                </label>
+            </div>
+
+            <div class="permissions-section">
+                <h3>Permissions</h3>
+                <p>Sélectionnez les permissions à assigner à ce rôle :</p>
+                
+                <div th:if="${permissions != null and !permissions.empty}">
+                    <!-- Grouper les permissions par module -->
+                    <div th:each="module : ${#sets.toSet(permissions.![nomModule])}" class="permission-group">
+                        <h4 th:text="${module}"></h4>
+                        <div class="permission-item" th:each="permission : ${permissions}" th:if="${permission.nomModule == module}">
+                            <label>
+                                <input type="checkbox" 
+                                       name="permissionIds" 
+                                       th:value="${permission.id}"
+                                       th:checked="${permissionsRole != null and permissionsRole.contains(permission.id)}" />
+                                <span th:text="${permission.nom}"></span>
+                                <small th:if="${permission.description}" th:text="' - ' + ${permission.description}" style="color: #666;"></small>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                
+                <div th:if="${permissions == null or permissions.empty}" style="color: #666; font-style: italic;">
+                    Aucune permission disponible.
+                </div>
+            </div>
+
+            <div style="margin-top: 30px;">
+                <button type="submit" class="btn btn-primary">Enregistrer</button>
+                <a th:href="@{/securite/roles}" class="btn btn-secondary">Annuler</a>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        // Script pour gérer la sélection/désélection de toutes les permissions d'un module
+        document.addEventListener('DOMContentLoaded', function() {
+            const moduleGroups = document.querySelectorAll('.permission-group');
+            moduleGroups.forEach(function(group) {
+                const moduleHeader = group.querySelector('h4');
+                const checkboxes = group.querySelectorAll('input[type="checkbox"]');
+                
+                // Créer un checkbox "Tout sélectionner" pour chaque module
+                const selectAllCheckbox = document.createElement('input');
+                selectAllCheckbox.type = 'checkbox';
+                selectAllCheckbox.style.marginRight = '5px';
+                
+                const selectAllLabel = document.createElement('label');
+                selectAllLabel.style.fontWeight = 'bold';
+                selectAllLabel.appendChild(selectAllCheckbox);
+                selectAllLabel.appendChild(document.createTextNode('Tout sélectionner'));
+                
+                moduleHeader.parentNode.insertBefore(selectAllLabel, moduleHeader.nextSibling);
+                
+                // Gérer la sélection/désélection
+                selectAllCheckbox.addEventListener('change', function() {
+                    checkboxes.forEach(function(checkbox) {
+                        checkbox.checked = selectAllCheckbox.checked;
+                    });
+                });
+                
+                // Mettre à jour le checkbox "Tout sélectionner" quand les permissions changent
+                checkboxes.forEach(function(checkbox) {
+                    checkbox.addEventListener('change', function() {
+                        const checkedCount = Array.from(checkboxes).filter(cb => cb.checked).length;
+                        selectAllCheckbox.checked = checkedCount === checkboxes.length;
+                        selectAllCheckbox.indeterminate = checkedCount > 0 && checkedCount < checkboxes.length;
+                    });
+                });
+                
+                // Initialiser l'état du checkbox "Tout sélectionner"
+                const checkedCount = Array.from(checkboxes).filter(cb => cb.checked).length;
+                selectAllCheckbox.checked = checkedCount === checkboxes.length;
+                selectAllCheckbox.indeterminate = checkedCount > 0 && checkedCount < checkboxes.length;
+            });
+        });
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <title th:text="${titre}">Permission</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" th:href="@{/css/styles.css}" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body>
+    <div class="container mt-4">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h3 th:text="${titre}" class="mb-0">Permission</h3>
+            </div>
+            <div class="card-body">
+                <div th:if="${errorMessage}" class="alert alert-danger" th:text="${errorMessage}"></div>
+                <div th:if="${successMessage}" class="alert alert-success" th:text="${successMessage}"></div>
+
+                <form th:object="${permission}"
+                      th:action="${permission.id} != null ? @{'/securite/permissions/' + ${permission.id} + '/modifier'} : @{/securite/permissions/nouveau}"
+                      method="post">
+                    
+                    <!-- Sélection du module -->
+                    <div class="card mb-4">
+                        <div class="card-header bg-light">
+                            <h5 class="mb-0">Module</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="form-group">
+                                <label for="nomModule">Module *</label>
+                                <select id="nomModule" th:field="*{nomModule}" class="form-control" required>
+                                    <option value="">Sélectionner un module</option>
+                                    <optgroup label="Modules système">
+                                        <option th:each="module : ${modules}" 
+                                                th:if="${#lists.contains(systemModules, module)}"
+                                                th:value="${module}" 
+                                                th:text="${module}"></option>
+                                    </optgroup>
+                                    <optgroup label="Modules personnalisés">
+                                        <option th:each="module : ${modules}" 
+                                                th:unless="${#lists.contains(systemModules, module)}"
+                                                th:value="${module}" 
+                                                th:text="${module}"></option>
+                                    </optgroup>
+                                </select>
+                                <small class="form-text text-muted">Module auquel appartient cette permission</small>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Sélection de l'action -->
+                    <div class="card mb-4">
+                        <div class="card-header bg-light">
+                            <h5 class="mb-0">Action</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="form-group">
+                                <label for="actionType">Type d'action *</label>
+                                <select id="actionType" class="form-control" required>
+                                    <option value="standard">Action standard</option>
+                                    <option value="custom">Action personnalisée</option>
+                                </select>
+                                <small class="form-text text-muted">Choisissez le type d'action pour cette permission</small>
+                            </div>
+                            
+                            <div id="standardActionGroup" class="form-group">
+                                <label for="standardAction">Action standard *</label>
+                                <select id="standardAction" class="form-control">
+                                    <option value="">Sélectionner une action</option>
+                                    <option th:each="action : ${standardActions}" 
+                                            th:value="${action}" 
+                                            th:text="${action}"
+                                            th:selected="${permission.nomAction != null && permission.nomAction == action}"></option>
+                                </select>
+                            </div>
+                            
+                            <div id="customActionGroup" class="form-group" style="display: none;">
+                                <label for="customAction">Action personnalisée *</label>
+                                <input type="text" id="customAction" class="form-control" 
+                                       placeholder="Ex: IMPORTER_EXCEL" />
+                                <small class="form-text text-muted">Nom de l'action personnalisée (utilisez des majuscules et des underscores)</small>
+                            </div>
+                            
+                            <!-- Champ caché pour stocker la valeur finale -->
+                            <input type="hidden" id="nomAction" th:field="*{nomAction}" />
+                        </div>
+                    </div>
+
+                    <!-- Informations de la permission -->
+                    <div class="card mb-4">
+                        <div class="card-header bg-light">
+                            <h5 class="mb-0">Informations de la permission</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="form-row">
+                                <div class="form-group col-md-8">
+                                    <label for="nom">Nom de la Permission *</label>
+                                    <input type="text" id="nom" th:field="*{nom}" class="form-control" required 
+                                           placeholder="Ex: SECURITE_LIRE" />
+                                    <small class="form-text text-muted">Format recommandé: MODULE_ACTION (généré automatiquement)</small>
+                                    <div th:if="${#fields.hasErrors('nom')}" class="text-danger" th:errors="*{nom}"></div>
+                                </div>
+                                
+                                <div class="form-group col-md-4">
+                                    <label for="niveauPriorite">Niveau de Priorité</label>
+                                    <input type="number" id="niveauPriorite" th:field="*{niveauPriorite}" 
+                                           min="0" max="100" value="0" class="form-control" />
+                                    <small class="form-text text-muted">0 = priorité normale, plus élevé = plus prioritaire</small>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="description">Description</label>
+                                <textarea id="description" th:field="*{description}" class="form-control" 
+                                          placeholder="Description de la permission..."></textarea>
+                                <div th:if="${#fields.hasErrors('description')}" class="text-danger" th:errors="*{description}"></div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="urlPattern">URL Pattern</label>
+                                <input type="text" id="urlPattern" th:field="*{urlPattern}" class="form-control"
+                                       placeholder="Ex: /securite/**" />
+                                <small class="form-text text-muted">Pattern d'URL pour la sécurité (généré automatiquement à partir du module)</small>
+                                <div th:if="${#fields.hasErrors('urlPattern')}" class="text-danger" th:errors="*{urlPattern}"></div>
+                            </div>
+
+                            <div class="form-group">
+                                <div class="custom-control custom-switch">
+                                    <input type="checkbox" class="custom-control-input" id="permissionActif" th:field="*{permissionActif}" />
+                                    <label class="custom-control-label" for="permissionActif">Permission active</label>
+                                    <small class="form-text text-muted d-block">Une permission inactive ne sera pas prise en compte dans la sécurité</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <button type="submit" class="btn btn-primary mr-2">Enregistrer</button>
+                        <a th:href="@{/securite/permissions}" class="btn btn-secondary">Annuler</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script th:inline="javascript">
+        document.addEventListener('DOMContentLoaded', function() {
+            // Éléments du formulaire
+            const nomModuleField = document.getElementById('nomModule');
+            const actionTypeSelect = document.getElementById('actionType');
+            const standardActionGroup = document.getElementById('standardActionGroup');
+            const customActionGroup = document.getElementById('customActionGroup');
+            const standardActionSelect = document.getElementById('standardAction');
+            const customActionField = document.getElementById('customAction');
+            const nomActionField = document.getElementById('nomAction');
+            const nomField = document.getElementById('nom');
+            const urlPatternField = document.getElementById('urlPattern');
+            
+            // Fonction pour afficher le groupe d'action approprié
+            function showActionGroup() {
+                const actionType = actionTypeSelect.value;
+                standardActionGroup.style.display = (actionType === 'standard') ? 'block' : 'none';
+                customActionGroup.style.display = (actionType === 'custom') ? 'block' : 'none';
+            }
+            
+            // Mettre à jour le champ nomAction caché
+            function updateNomAction() {
+                const actionType = actionTypeSelect.value;
+                
+                switch (actionType) {
+                    case 'standard':
+                        nomActionField.value = standardActionSelect.value;
+                        break;
+                    case 'custom':
+                        nomActionField.value = customActionField.value.toUpperCase();
+                        break;
+                }
+                
+                generatePermissionName();
+            }
+            
+            // Générer automatiquement le nom de la permission
+            function generatePermissionName() {
+                const module = nomModuleField.value;
+                const action = nomActionField.value;
+                
+                if (module && action) {
+                    const generatedName = module.toUpperCase() + '_' + action.toUpperCase();
+                    if (!nomField.value || nomField.getAttribute('data-autogenerated') === 'true') {
+                        nomField.value = generatedName;
+                        nomField.setAttribute('data-autogenerated', 'true');
+                    }
+                }
+            }
+            
+            // Générer automatiquement l'URL pattern
+            function generateUrlPattern() {
+                const module = nomModuleField.value;
+                
+                if (module && (!urlPatternField.value || urlPatternField.getAttribute('data-autogenerated') === 'true')) {
+                    urlPatternField.value = '/' + module.toLowerCase() + '/**';
+                    urlPatternField.setAttribute('data-autogenerated', 'true');
+                }
+            }
+            
+            // Événements
+            actionTypeSelect.addEventListener('change', showActionGroup);
+            
+            standardActionSelect.addEventListener('change', function() {
+                updateNomAction();
+            });
+            
+            customActionField.addEventListener('input', function() {
+                updateNomAction();
+            });
+            
+            nomModuleField.addEventListener('change', function() {
+                generateUrlPattern();
+                updateNomAction();
+            });
+            
+            // Pour permettre à l'utilisateur de modifier manuellement sans auto-génération future
+            nomField.addEventListener('input', function() {
+                nomField.removeAttribute('data-autogenerated');
+            });
+            
+            urlPatternField.addEventListener('input', function() {
+                urlPatternField.removeAttribute('data-autogenerated');
+            });
+            
+            // Initialiser le formulaire
+            showActionGroup();
+            
+            // Si nous avons déjà une action, déterminer son type
+            if (nomActionField.value) {
+                // Vérifier si c'est une action standard
+                let isStandard = false;
+                for (let i = 0; i < standardActionSelect.options.length; i++) {
+                    if (standardActionSelect.options[i].value === nomActionField.value) {
+                        standardActionSelect.value = nomActionField.value;
+                        actionTypeSelect.value = 'standard';
+                        isStandard = true;
+                        break;
+                    }
+                }
+                
+                if (!isStandard) {
+                    // C'est une action personnalisée
+                    customActionField.value = nomActionField.value;
+                    actionTypeSelect.value = 'custom';
+                    showActionGroup();
+                }
+            }
+            
+            // Initialiser avec les valeurs existantes
+            generateUrlPattern();
+        });
+    </script>
+
+</body>
+</html>

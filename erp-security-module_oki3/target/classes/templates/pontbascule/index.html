@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <title>Pont Bascule</title>
+</head>
+<body>
+<h1>Pont Bascule</h1>
+
+<h2>Produits</h2>
+<a th:href="@{/pontbascule/produits/nouveau}">Nouveau produit</a>
+<table border="1">
+    <tr><th>ID</th><th>Désignation</th><th>Actions</th></tr>
+    <tr th:each="p : ${produits}">
+        <td th:text="${p.idProduit}"></td>
+        <td th:text="${p.designationProduit}"></td>
+        <td>
+            <a th:href="@{'/pontbascule/produits/' + ${p.idProduit} + '/modifier'}">Modifier</a>
+            <form th:action="@{'/pontbascule/produits/' + ${p.idProduit} + '/supprimer'}" method="post" style="display:inline">
+                <button type="submit">Supprimer</button>
+            </form>
+        </td>
+    </tr>
+    </table>
+
+<h2>Partenaires</h2>
+<a th:href="@{/pontbascule/partenaires/nouveau}">Nouveau partenaire</a>
+<table border="1">
+    <tr><th>ID</th><th>Raison sociale</th><th>Actions</th></tr>
+    <tr th:each="pt : ${partenaires}">
+        <td th:text="${pt.id}"></td>
+        <td th:text="${pt.raisonSociale}"></td>
+        <td>
+            <a th:href="@{'/pontbascule/partenaires/' + ${pt.id} + '/modifier'}">Modifier</a>
+            <form th:action="@{'/pontbascule/partenaires/' + ${pt.id}}" method="post" style="display:inline">
+                <button type="submit">Enregistrer</button>
+            </form>
+            <form th:action="@{'/pontbascule/partenaires/' + ${pt.id} + '/supprimer'}" method="post" style="display:inline">
+                <button type="submit">Supprimer</button>
+            </form>
+        </td>
+    </tr>
+    </table>
+
+<h2>Opérations</h2>
+<a th:href="@{/pontbascule/operations/nouveau}">Nouvelle opération</a>
+<table border="1">
+    <tr>
+        <th>ID</th><th>Date</th><th>Heure</th><th>Produit</th><th>Partenaire</th>
+        <th>Type</th><th>Immat</th><th>P1</th><th>P2</th><th>Net</th><th>Qté</th><th>Écart</th><th>Actions</th>
+    </tr>
+    <tr th:each="op : ${operations}">
+        <td th:text="${op.id}"></td>
+        <td th:text="${op.dateOperation}"></td>
+        <td th:text="${op.heureOperation}"></td>
+        <td th:text="${op.produit != null ? op.produit.designationProduit : ''}"></td>
+        <td th:text="${op.partenaire != null ? op.partenaire.raisonSociale : ''}"></td>
+        <td th:text="${op.typeOperation != null ? op.typeOperation.libelle : ''}"></td>
+        <td th:text="${op.immatriculation}"></td>
+        <td th:text="${op.peser1}"></td>
+        <td th:text="${op.peser2}"></td>
+        <td th:text="${op.poidsNet}"></td>
+        <td th:text="${op.qteDeclare}"></td>
+        <td th:text="${op.ecart}"></td>
+        <td>
+            <a th:href="@{'/pontbascule/operations/' + ${op.id} + '/modifier'}">Modifier</a>
+            <form th:action="@{'/pontbascule/operations/' + ${op.id} + '/supprimer'}" method="post" style="display:inline">
+                <button type="submit">Supprimer</button>
+            </form>
+        </td>
+    </tr>
+    </table>
+
+</body>
+</html>
+
+

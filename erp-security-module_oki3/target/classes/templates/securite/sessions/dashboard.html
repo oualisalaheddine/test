@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tableau de Bord Sessions - ERP Sécurité</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .metric-card {
+            border-left: 4px solid #007bff;
+            transition: transform 0.2s;
+        }
+        .metric-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .chart-container {
+            position: relative;
+            height: 300px;
+        }
+        .alert-suspicious {
+            border-left: 4px solid #ffc107;
+            background-color: #fff3cd;
+        }
+        .real-time-indicator {
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <div th:replace="~{layout/main :: layout(~{::main}, 'Dashboard Sessions')}">
+        <main>
+            <div class="container-fluid">
+                <!-- En-tête -->
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h2><i class="fas fa-tachometer-alt"></i> Tableau de Bord Sessions</h2>
+                            <div class="btn-group">
+                                <button type="button" class="btn btn-outline-primary" onclick="refreshDashboard()">
+                                    <i class="fas fa-sync-alt real-time-indicator"></i> Temps Réel
+                                </button>
+                                <a href="/securite/sessions" class="btn btn-outline-secondary">
+                                    <i class="fas fa-list"></i> Liste Sessions
+                                </a>
+                                <button type="button" class="btn btn-outline-success" onclick="exportReport()">
+                                    <i class="fas fa-download"></i> Exporter
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Métriques principales -->
+                <div class="row mb-4">
+                    <div class="col-xl-3 col-md-6">
+                        <div class="card metric-card border-primary">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between">
+                                    <div>
+                                        <h6 class="card-title text-muted">Sessions Actives</h6>
+                                        <h2 class="mb-0 text-primary" th:text="${dashboard.activeSessions}">0</h2>
+                                        <small class="text-success" th:if="${dashboard.activeSessionsChange > 0}">
+                                            <i class="fas fa-arrow-up"></i> +<span th:text="${dashboard.activeSessionsChange}">0</span>%
+                                        </small>
+                                        <small class="text-danger" th:if="${dashboard.activeSessionsChange < 0}">
+                                            <i class="fas fa-arrow-down"></i> <span th:text="${dashboard.activeSessionsChange}">0</span>%
+                                        </small>
+                                    </div>
+                                    <div class="align-self-center">
+                                        <i class="fas fa-circle text-success fa-3x"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-xl-3 col-md-6">
+                        <div class="card metric-card border-info">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between">
+                                    <div>
+                                        <h6 class="card-title text-muted">Utilisateurs Connectés</h6>
+                                        <h2 class="mb-0 text-info" th:text="${dashboard.activeUsers}">0</h2>
+                                        <small class="text-muted">sur <span th:text="${dashboard.totalUsers}">0</span> utilisateurs</small>
+                                    </div>
+                                    <div class="align-self-center">
+                                        <i class="fas fa-users text-info fa-3x"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-xl-3 col-md-6">
+                        <div class="card metric-card border-warning">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between">
+                                    <div>
+                                        <h6 class="card-title text-muted">Sessions Suspectes</h6>
+                                        <h2 class="mb-0 text-warning" th:text="${dashboard.suspiciousSessions}">0</h2>
+                                        <small class="text-muted">dernières 24h</small>
+                                    </div>
+                                    <div class="align-self-center">
+                                        <i class="fas fa-exclamation-triangle text-warning fa-3x"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-xl-3 col-md-6">
+                        <div class="card metric-card border-secondary">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between">
+                                    <div>
+                                        <h6 class="card-title text-muted">Durée Moyenne</h6>
+                                        <h2 class="mb-0 text-secondary" th:text="${dashboard.averageDuration != null ? #numbers.formatDecimal(dashboard.averageDuration, 1, 1) + 'h' : 'N/A'}">0h</h2>
+                                        <small class="text-muted">cette semaine</small>
+                                    </div>
+                                    <div class="align-self-center">
+                                        <i class="fas fa-clock text-secondary fa-3x"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Graphiques -->
+                <div class="row mb-4">
+                    <div class="col-lg-8">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="mb-0"><i class="fas fa-chart-line"></i> Évolution des Sessions (7 derniers jours)</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="chart-container">
+                                    <canvas id="sessionsTimeChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-4">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="mb-0"><i class="fas fa-chart-pie"></i> Répartition par Navigateur</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="chart-container">
+                                    <canvas id="browsersChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row mb-4">
+                    <div class="col-lg-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="mb-0"><i class="fas fa-chart-bar"></i> Top Utilisateurs Actifs</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="chart-container">
+                                    <canvas id="topUsersChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="mb-0"><i class="fas fa-globe"></i> Répartition par Adresse IP</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="chart-container">
+                                    <canvas id="ipChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sessions suspectes -->
+                <div class="row mb-4" th:if="${suspiciousSessions != null and !suspiciousSessions.empty}">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header bg-warning text-dark">
+                                <h5 class="mb-0"><i class="fas fa-shield-alt"></i> Activités Suspectes Détectées</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="alert alert-suspicious" th:each="suspicious : ${suspiciousSessions}">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <strong>Utilisateur:</strong> <span th:text="${suspicious[0]}">username</span> |
+                                            <strong>IPs:</strong> <span th:text="${suspicious[1]} + ' → ' + ${suspicious[2]}">IP1 → IP2</span> |
+                                            <strong>Dates:</strong> <span th:text="${suspicious[3]} + ' → ' + ${suspicious[4]}">Date1 → Date2</span>
+                                        </div>
+                                        <button class="btn btn-sm btn-outline-danger" onclick="investigateSuspicious()">
+                                            <i class="fas fa-search"></i> Enquêter
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sessions actives en temps réel -->
+                <div class="row">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <h5 class="mb-0"><i class="fas fa-broadcast-tower"></i> Sessions Actives en Temps Réel</h5>
+                                <span class="badge bg-success" th:text="${activeSessions.size()} + ' session(s) active(s)'">0 session(s)</span>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table table-sm table-hover">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th>Utilisateur</th>
+                                                <th>IP</th>
+                                                <th>Navigateur</th>
+                                                <th>Dernière Activité</th>
+                                                <th>Durée</th>
+                                                <th>Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr th:each="session : ${activeSessions}">
+                                                <td>
+                                                    <i class="fas fa-circle text-success me-1"></i>
+                                                    <strong th:text="${session.utilisateur.username}">username</strong>
+                                                </td>
+                                                <td th:text="${session.ipAddress}">192.168.1.1</td>
+                                                <td>
+                                                    <i class="fab fa-chrome" th:if="${session.navigateur == 'Chrome'}"></i>
+                                                    <i class="fab fa-firefox" th:if="${session.navigateur == 'Firefox'}"></i>
+                                                    <i class="fab fa-safari" th:if="${session.navigateur == 'Safari'}"></i>
+                                                    <i class="fab fa-edge" th:if="${session.navigateur == 'Edge'}"></i>
+                                                    <span th:text="${session.navigateur}">Chrome</span>
+                                                </td>
+                                                <td th:text="${#temporals.format(session.dateDerniereActivite, 'HH:mm:ss')}">10:30:45</td>
+                                                <td>
+                                                    <span th:text="${T(java.time.Duration).between(session.dateCreation, T(java.time.LocalDateTime).now()).toMinutes()} + ' min'">30 min</span>
+                                                </td>
+                                                <td>
+                                                    <div class="btn-group btn-group-sm">
+                                                        <button type="button" class="btn btn-outline-warning btn-sm" 
+                                                                th:onclick="'extendSession(\'' + ${session.sessionId} + '\')'">
+                                                            <i class="fas fa-clock"></i>
+                                                        </button>
+                                                        <button type="button" class="btn btn-outline-danger btn-sm" 
+                                                                th:onclick="'terminateSession(\'' + ${session.sessionId} + '\')'">
+                                                            <i class="fas fa-times"></i>
+                                                        </button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script th:inline="javascript">
+        // Données pour les graphiques
+        const dashboardData = /*[[${dashboard}]]*/ {};
+        const sessionsTimeData = /*[[${sessionsTimeData}]]*/ [];
+        const browsersData = /*[[${browsersData}]]*/ [];
+        const topUsersData = /*[[${topUsersData}]]*/ [];
+        const ipData = /*[[${ipData}]]*/ [];
+
+        // Configuration des graphiques
+        Chart.defaults.font.family = 'Arial, sans-serif';
+        Chart.defaults.font.size = 12;
+
+        // Graphique d'évolution temporelle
+        const sessionsTimeCtx = document.getElementById('sessionsTimeChart').getContext('2d');
+        new Chart(sessionsTimeCtx, {
+            type: 'line',
+            data: {
+                labels: sessionsTimeData.map(d => d.date),
+                datasets: [{
+                    label: 'Sessions Actives',
+                    data: sessionsTimeData.map(d => d.activeSessions),
+                    borderColor: '#007bff',
+                    backgroundColor: 'rgba(0, 123, 255, 0.1)',
+                    tension: 0.4,
+                    fill: true
+                }, {
+                    label: 'Nouvelles Sessions',
+                    data: sessionsTimeData.map(d => d.newSessions),
+                    borderColor: '#28a745',
+                    backgroundColor: 'rgba(40, 167, 69, 0.1)',
+                    tension: 0.4,
+                    fill: true
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+
+        // Graphique des navigateurs
+        const browsersCtx = document.getElementById('browsersChart').getContext('2d');
+        new Chart(browsersCtx, {
+            type: 'doughnut',
+            data: {
+                labels: browsersData.map(d => d.browser),
+                datasets: [{
+                    data: browsersData.map(d => d.count),
+                    backgroundColor: [
+                        '#FF6384',
+                        '#36A2EB',
+                        '#FFCE56',
+                        '#4BC0C0',
+                        '#9966FF'
+                    ]
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    }
+                }
+            }
+        });
+
+        // Graphique des top utilisateurs
+        const topUsersCtx = document.getElementById('topUsersChart').getContext('2d');
+        new Chart(topUsersCtx, {
+            type: 'bar',
+            data: {
+                labels: topUsersData.map(d => d.username),
+                datasets: [{
+                    label: 'Nombre de Sessions',
+                    data: topUsersData.map(d => d.sessionCount),
+                    backgroundColor: '#007bff',
+                    borderColor: '#0056b3',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+
+        // Graphique des IPs
+        const ipCtx = document.getElementById('ipChart').getContext('2d');
+        new Chart(ipCtx, {
+            type: 'bar',
+            data: {
+                labels: ipData.map(d => d.ip),
+                datasets: [{
+                    label: 'Sessions par IP',
+                    data: ipData.map(d => d.count),
+                    backgroundColor: '#17a2b8',
+                    borderColor: '#138496',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                indexAxis: 'y',
+                scales: {
+                    x: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+
+        // Fonctions utilitaires
+        function refreshDashboard() {
+            window.location.reload();
+        }
+
+        function exportReport() {
+            window.open('/api/sessions/export/dashboard', '_blank');
+        }
+
+        function investigateSuspicious() {
+            alert('Fonctionnalité d\'enquête en développement');
+        }
+
+        function extendSession(sessionId) {
+            if (confirm('Prolonger cette session de 4 heures ?')) {
+                fetch(`/api/sessions/${sessionId}/extend`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ hours: 4 })
+                })
+                .then(response => {
+                    if (response.ok) {
+                        alert('Session prolongée avec succès');
+                        refreshDashboard();
+                    } else {
+                        alert('Erreur lors de la prolongation de la session');
+                    }
+                });
+            }
+        }
+
+        function terminateSession(sessionId) {
+            if (confirm('Êtes-vous sûr de vouloir terminer cette session ?')) {
+                fetch(`/api/sessions/${sessionId}/terminate`, {
+                    method: 'POST'
+                })
+                .then(response => {
+                    if (response.ok) {
+                        alert('Session terminée avec succès');
+                        refreshDashboard();
+                    } else {
+                        alert('Erreur lors de la terminaison de la session');
+                    }
+                });
+            }
+        }
+
+        // Auto-refresh toutes les 30 secondes
+        setInterval(refreshDashboard, 30000);
+    </script>
+</body>
+</html>

@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <title th:text="${titre}">Utilisateur</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        .form-container { max-width: 800px; margin: 0 auto; padding: 20px; }
+        .form-header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 2rem 0; margin-bottom: 2rem; border-radius: 8px; }
+        .form-section { background: white; border: 1px solid #ddd; border-radius: 8px; padding: 20px; margin-bottom: 20px; }
+        .form-section h5 { color: #007bff; border-bottom: 2px solid #007bff; padding-bottom: 10px; margin-bottom: 20px; }
+        .password-strength { margin-top: 5px; }
+        .strength-weak { color: #dc3545; }
+        .strength-medium { color: #ffc107; }
+        .strength-strong { color: #28a745; }
+        .user-avatar-preview { width: 80px; height: 80px; border-radius: 50%; background: linear-gradient(45deg, #007bff, #0056b3); display: flex; align-items: center; justify-content: center; color: white; font-size: 2rem; font-weight: bold; margin: 0 auto 20px; }
+    </style>
+</head>
+<body>
+    <div class="form-container">
+        <!-- Header -->
+        <div class="form-header">
+            <div class="container">
+                <div class="row align-items-center">
+                    <div class="col-md-8">
+                        <h1 class="mb-0"><i class="fas fa-user me-3"></i><span th:text="${titre}">Utilisateur</span></h1>
+                        <p class="mb-0 mt-2">Gestion des informations utilisateur</p>
+                    </div>
+                    <div class="col-md-4 text-end">
+                        <a th:href="@{/securite/utilisateurs}" class="btn btn-light">
+                            <i class="fas fa-arrow-left me-2"></i>Retour à la liste
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Messages d'erreur -->
+        <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-circle me-2"></i>
+            <span th:text="${errorMessage}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+
+        <form th:object="${utilisateur}"
+              th:action="${utilisateur.id} != null ? @{'/securite/utilisateurs/' + ${utilisateur.id} + '/modifier'} : @{/securite/utilisateurs/nouveau}"
+              method="post">
+            
+            <!-- Informations de base -->
+            <div class="form-section">
+                <h5><i class="fas fa-user me-2"></i>Informations de Base</h5>
+                
+                <!-- Avatar preview -->
+                <div class="user-avatar-preview" th:text="${utilisateur.nom != null and utilisateur.prenom != null ? (#strings.substring(utilisateur.nom, 0, 1) + #strings.substring(utilisateur.prenom, 0, 1)) : '??'}"></div>
+                
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="nom" class="form-label">
+                            <i class="fas fa-user me-1"></i>Nom *
+                        </label>
+                        <input type="text" id="nom" class="form-control" th:field="*{nom}" required />
+                        <div th:if="${#fields.hasErrors('nom')}" th:errors="*{nom}" class="text-danger"></div>
+                    </div>
+                    
+                    <div class="col-md-6 mb-3">
+                        <label for="prenom" class="form-label">
+                            <i class="fas fa-user me-1"></i>Prénom *
+                        </label>
+                        <input type="text" id="prenom" class="form-control" th:field="*{prenom}" required />
+                        <div th:if="${#fields.hasErrors('prenom')}" th:errors="*{prenom}" class="text-danger"></div>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="username" class="form-label">
+                            <i class="fas fa-at me-1"></i>Nom d'utilisateur *
+                        </label>
+                        <input type="text" id="username" class="form-control" th:field="*{username}" required />
+                        <div th:if="${#fields.hasErrors('username')}" th:errors="*{username}" class="text-danger"></div>
+                        <div class="form-text">Le nom d'utilisateur doit être unique.</div>
+                    </div>
+                    
+                    <div class="col-md-6 mb-3">
+                        <label for="email" class="form-label">
+                            <i class="fas fa-envelope me-1"></i>Email *
+                        </label>
+                        <input type="email" id="email" class="form-control" th:field="*{email}" required />
+                        <div th:if="${#fields.hasErrors('email')}" th:errors="*{email}" class="text-danger"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Mot de passe -->
+            <div class="form-section">
+                <h5><i class="fas fa-lock me-2"></i>Mot de Passe</h5>
+                
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="password" class="form-label">
+                            <i class="fas fa-key me-1"></i>Mot de passe <span th:if="${utilisateur.id == null}">*</span>
+                        </label>
+                        <input type="password" id="password" class="form-control" th:field="*{password}" 
+                               th:required="${utilisateur.id == null}" />
+                        <div th:if="${#fields.hasErrors('password')}" th:errors="*{password}" class="text-danger"></div>
+                        <div class="password-strength" id="passwordStrength"></div>
+                        <div class="form-text">
+                            <i class="fas fa-info-circle me-1"></i>
+                            <span th:if="${utilisateur.id == null}">Le mot de passe est obligatoire pour un nouvel utilisateur.</span>
+                            <span th:unless="${utilisateur.id == null}">Laissez vide pour conserver le mot de passe actuel.</span>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6 mb-3">
+                        <label for="confirmPassword" class="form-label">
+                            <i class="fas fa-key me-1"></i>Confirmer le mot de passe
+                        </label>
+                        <input type="password" id="confirmPassword" class="form-control" />
+                        <div id="passwordMatch" class="form-text"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Statut et options -->
+            <div class="form-section">
+                <h5><i class="fas fa-cog me-2"></i>Statut et Options</h5>
+                
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="compteActif" th:field="*{compteActif}" />
+                            <label class="form-check-label" for="compteActif">
+                                <i class="fas fa-toggle-on me-1"></i>Compte actif
+                            </label>
+                        </div>
+                        <div class="form-text">Un compte inactif ne peut pas se connecter au système.</div>
+                    </div>
+                    
+                    <div class="col-md-6 mb-3">
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="compteNonExpire" th:field="*{compteNonExpire}" />
+                            <label class="form-check-label" for="compteNonExpire">
+                                <i class="fas fa-calendar-check me-1"></i>Compte non expiré
+                            </label>
+                        </div>
+                        <div class="form-text">Le compte n'expire pas automatiquement.</div>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="credentialsNonExpire" th:field="*{credentialsNonExpire}" />
+                            <label class="form-check-label" for="credentialsNonExpire">
+                                <i class="fas fa-shield-alt me-1"></i>Identifiants non expirés
+                            </label>
+                        </div>
+                        <div class="form-text">Les identifiants ne nécessitent pas de changement.</div>
+                    </div>
+                    
+                    <div class="col-md-6 mb-3">
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="compteNonVerrouille" th:field="*{compteNonVerrouille}" />
+                            <label class="form-check-label" for="compteNonVerrouille">
+                                <i class="fas fa-unlock me-1"></i>Compte non verrouillé
+                            </label>
+                        </div>
+                        <div class="form-text">Le compte n'est pas verrouillé par sécurité.</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="form-section">
+                <div class="d-flex justify-content-between">
+                    <a th:href="@{/securite/utilisateurs}" class="btn btn-secondary">
+                        <i class="fas fa-times me-2"></i>Annuler
+                    </a>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save me-2"></i>Enregistrer
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Mise à jour de l'avatar en temps réel
+            const nomInput = document.getElementById('nom');
+            const prenomInput = document.getElementById('prenom');
+            const avatarPreview = document.querySelector('.user-avatar-preview');
+            
+            function updateAvatar() {
+                const nom = nomInput.value || '';
+                const prenom = prenomInput.value || '';
+                const initials = (nom.charAt(0) + prenom.charAt(0)).toUpperCase() || '??';
+                avatarPreview.textContent = initials;
+            }
+            
+            nomInput.addEventListener('input', updateAvatar);
+            prenomInput.addEventListener('input', updateAvatar);
+            
+            // Vérification de la force du mot de passe
+            const passwordInput = document.getElementById('password');
+            const confirmPasswordInput = document.getElementById('confirmPassword');
+            const passwordStrength = document.getElementById('passwordStrength');
+            const passwordMatch = document.getElementById('passwordMatch');
+            
+            function checkPasswordStrength(password) {
+                let strength = 0;
+                let feedback = [];
+                
+                if (password.length >= 8) strength++;
+                else feedback.push('Au moins 8 caractères');
+                
+                if (/[a-z]/.test(password)) strength++;
+                else feedback.push('Une minuscule');
+                
+                if (/[A-Z]/.test(password)) strength++;
+                else feedback.push('Une majuscule');
+                
+                if (/[0-9]/.test(password)) strength++;
+                else feedback.push('Un chiffre');
+                
+                if (/[^A-Za-z0-9]/.test(password)) strength++;
+                else feedback.push('Un caractère spécial');
+                
+                if (strength < 3) {
+                    passwordStrength.className = 'password-strength strength-weak';
+                    passwordStrength.innerHTML = '<i class="fas fa-exclamation-triangle me-1"></i>Faible - ' + feedback.join(', ');
+                } else if (strength < 5) {
+                    passwordStrength.className = 'password-strength strength-medium';
+                    passwordStrength.innerHTML = '<i class="fas fa-exclamation-circle me-1"></i>Moyen - ' + feedback.join(', ');
+                } else {
+                    passwordStrength.className = 'password-strength strength-strong';
+                    passwordStrength.innerHTML = '<i class="fas fa-check-circle me-1"></i>Fort';
+                }
+            }
+            
+            function checkPasswordMatch() {
+                const password = passwordInput.value;
+                const confirm = confirmPasswordInput.value;
+                
+                if (confirm === '') {
+                    passwordMatch.textContent = '';
+                    passwordMatch.className = 'form-text';
+                } else if (password === confirm) {
+                    passwordMatch.textContent = '✓ Les mots de passe correspondent';
+                    passwordMatch.className = 'form-text text-success';
+                } else {
+                    passwordMatch.textContent = '✗ Les mots de passe ne correspondent pas';
+                    passwordMatch.className = 'form-text text-danger';
+                }
+            }
+            
+            passwordInput.addEventListener('input', function() {
+                checkPasswordStrength(this.value);
+                checkPasswordMatch();
+            });
+            
+            confirmPasswordInput.addEventListener('input', checkPasswordMatch);
+        });
+    </script>
+</body>
+</html>
+
+

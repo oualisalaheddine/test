@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <title>Détails du Rôle</title>
+    <link rel="stylesheet" th:href="@{/css/styles.css}" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        .details-container { max-width: 1000px; margin: 0 auto; padding: 20px; }
+        .info-section { background: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 20px; }
+        .info-row { display: flex; margin-bottom: 10px; }
+        .info-label { font-weight: bold; width: 150px; }
+        .info-value { flex: 1; }
+        .status-active { color: #28a745; font-weight: bold; }
+        .status-inactive { color: #dc3545; font-weight: bold; }
+        .btn { padding: 8px 16px; margin: 5px; text-decoration: none; border-radius: 4px; display: inline-block; }
+        .btn-primary { background-color: #007bff; color: white; }
+        .btn-warning { background-color: #ffc107; color: black; }
+        .btn-danger { background-color: #dc3545; color: white; }
+        .btn-success { background-color: #28a745; color: white; }
+        .permissions-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 15px; }
+        .permission-card { background: white; border: 1px solid #ddd; border-radius: 6px; padding: 15px; }
+        .permission-name { font-weight: bold; color: #007bff; }
+        .permission-description { color: #666; font-size: 0.9em; margin-top: 5px; }
+        .permission-module { background: #e9ecef; padding: 2px 6px; border-radius: 3px; font-size: 0.8em; }
+        .users-list { background: white; border: 1px solid #ddd; border-radius: 6px; padding: 15px; }
+        .user-item { padding: 5px 0; border-bottom: 1px solid #eee; }
+        .user-item:last-child { border-bottom: none; }
+        .no-data { text-align: center; color: #666; font-style: italic; padding: 20px; }
+    </style>
+</head>
+<body>
+    <div class="details-container">
+        <h1>Détails du Rôle</h1>
+
+        <div class="info-section">
+            <h2>Informations Générales</h2>
+            <div class="info-row">
+                <div class="info-label">ID:</div>
+                <div class="info-value" th:text="${role.id}"></div>
+            </div>
+            <div class="info-row">
+                <div class="info-label">Nom:</div>
+                <div class="info-value" th:text="${role.nom}"></div>
+            </div>
+            <div class="info-row">
+                <div class="info-label">Description:</div>
+                <div class="info-value" th:text="${role.description ?: 'Aucune description'}"></div>
+            </div>
+            <div class="info-row">
+                <div class="info-label">Statut:</div>
+                <div class="info-value">
+                    <span th:if="${role.roleActif}" class="status-active">Actif</span>
+                    <span th:unless="${role.roleActif}" class="status-inactive">Inactif</span>
+                </div>
+            </div>
+            <div class="info-row">
+                <div class="info-label">Date de création:</div>
+                <div class="info-value" th:text="${#temporals.format(role.dateCreation, 'dd/MM/yyyy à HH:mm')}"></div>
+            </div>
+            <div class="info-row">
+                <div class="info-label">Nombre de permissions:</div>
+                <div class="info-value" th:text="${permissions.size()}"></div>
+            </div>
+            <div class="info-row">
+                <div class="info-label">Nombre d'utilisateurs:</div>
+                <div class="info-value" th:text="${utilisateurs.size()}"></div>
+            </div>
+        </div>
+
+        <div style="margin: 20px 0;">
+            <a th:href="@{'/securite/roles/' + ${role.id} + '/modifier'}" class="btn btn-warning">Modifier</a>
+            <a th:href="@{'/securite/roles/' + ${role.id} + '/permissions'}" class="btn btn-primary">Gérer les Permissions</a>
+            
+            <form th:action="@{'/securite/roles/' + ${role.id} + '/activer'}" method="post" style="display:inline-block;" th:if="${!role.roleActif}">
+                <button type="submit" class="btn btn-success">Activer</button>
+            </form>
+            
+            <form th:action="@{'/securite/roles/' + ${role.id} + '/desactiver'}" method="post" style="display:inline-block;" th:if="${role.roleActif}">
+                <button type="submit" class="btn btn-warning">Désactiver</button>
+            </form>
+            
+            <form th:action="@{'/securite/roles/' + ${role.id} + '/supprimer'}" method="post" style="display:inline-block;">
+                <button type="submit" class="btn btn-danger" 
+                        onclick="return confirm('Êtes-vous sûr de vouloir supprimer ce rôle ? Cette action est irréversible.')">Supprimer</button>
+            </form>
+        </div>
+
+        <div class="info-section">
+            <h2>Permissions Assignées</h2>
+            <div th:if="${permissions != null and !permissions.empty}" class="permissions-grid">
+                <div th:each="permission : ${permissions}" class="permission-card">
+                    <div class="permission-name" th:text="${permission.nom}"></div>
+                    <div class="permission-description" th:text="${permission.description ?: 'Aucune description'}"></div>
+                    <div style="margin-top: 8px;">
+                        <span class="permission-module" th:text="${permission.nomModule}"></span>
+                        <span style="margin-left: 10px; font-size: 0.8em; color: #666;" th:text="${permission.nomAction}"></span>
+                    </div>
+                </div>
+            </div>
+            <div th:if="${permissions == null or permissions.empty}" class="no-data">
+                Aucune permission assignée à ce rôle.
+            </div>
+        </div>
+
+        <div class="info-section">
+            <h2>Utilisateurs avec ce Rôle</h2>
+            <div th:if="${utilisateurs != null and !utilisateurs.empty}" class="users-list">
+                <div th:each="utilisateur : ${utilisateurs}" class="user-item">
+                    <strong th:text="${utilisateur.nom + ' ' + utilisateur.prenom}"></strong>
+                    <span style="color: #666; margin-left: 10px;" th:text="'(' + ${utilisateur.username} + ')'"></span>
+                    <span style="float: right; color: #666;" th:text="${utilisateur.email}"></span>
+                </div>
+            </div>
+            <div th:if="${utilisateurs == null or utilisateurs.empty}" class="no-data">
+                Aucun utilisateur n'a ce rôle.
+            </div>
+        </div>
+
+        <div style="margin-top: 30px;">
+            <a th:href="@{/securite/roles}" class="btn btn-primary">← Retour à la liste</a>
+            <a th:href="@{/securite/utilisateurs}" class="btn btn-primary">Gérer les Utilisateurs</a>
+            <a th:href="@{/securite/permissions}" class="btn btn-primary">Gérer les Permissions</a>
+        </div>
+    </div>
+
+</body>
+</html>

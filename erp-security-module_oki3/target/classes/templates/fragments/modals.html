@@ -1,0 +1,48 @@
+<!-- templates/fragments/layout.html -->
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title th:text="${pageTitle} ?: 'ERP'">ERP</title>
+  <link rel="stylesheet" th:href="@{/css/bootstrap.min.css}" />
+  <link rel="stylesheet" th:href="@{/css/bootstrap-icons.css}" />
+  <style>
+    body { padding-top: 70px; }
+    .card-shadow { box-shadow: 0 2px 8px rgba(0,0,0,.06); }
+  </style>
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary fixed-top">
+  <div class="container-fluid">
+    <a class="navbar-brand" th:href="@{/}">Mon ERP</a>
+    <div class="collapse navbar-collapse">
+      <ul class="navbar-nav me-auto">
+        <li class="nav-item"><a class="nav-link" th:href="@{/pontbascule/operations-internes}">Opérations</a></li>
+        <li class="nav-item"><a class="nav-link" th:href="@{/pontbascule/vehicules-tarer}">Véhicules</a></li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<div class="container">
+  <div th:if="${success}" class="alert alert-success alert-dismissible fade show mt-3" role="alert">
+    <span th:text="${success}"></span>
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+  </div>
+  <div th:if="${error}" class="alert alert-danger alert-dismissible fade show mt-3" role="alert">
+    <span th:text="${error}"></span>
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+  </div>
+
+  <div th:fragment="content"></div>
+</div>
+
+<footer class="text-center py-3 text-muted">
+  &copy; <span th:text="${#dates.format(#dates.createNow(),'yyyy')}"></span> Mon ERP
+</footer>
+
+<script th:src="@{/js/bootstrap.bundle.min.js}"></script>
+<script th:src="@{/js/jquery.min.js}"></script>
+</body>
+</html>
