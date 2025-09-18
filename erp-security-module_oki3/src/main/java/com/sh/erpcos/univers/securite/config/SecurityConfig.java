@@ -1,8 +1,12 @@
 package com.sh.erpcos.univers.securite.config;
 
+import com.sh.erpcos.univers.securite.service.AuditService;
 import com.sh.erpcos.univers.securite.service.CustomUserDetailsService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
+import org.springframework.boot.web.servlet.error.DefaultErrorAttributes;
+import org.springframework.boot.web.servlet.error.ErrorAttributes;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -11,10 +15,13 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 
 @Configuration
@@ -25,20 +32,25 @@ import org.springframework.security.web.authentication.AuthenticationSuccessHand
 public class SecurityConfig {
     
     private final CustomUserDetailsService userDetailsService;
+    private final AuditService auditService;
     
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
     
-
-    
+   
     @Bean
     public AuthenticationSuccessHandler authenticationSuccessHandler() {
         return (request, response, authentication) -> {
             // Mettre à jour la dernière connexion
-            userDetailsService.updateLastLogin(authentication.getName());
-            log.info("Connexion réussie pour l'utilisateur: {}", authentication.getName());
+        	String username = authentication.getName();
+            userDetailsService.updateLastLogin(username);
+            log.info("Connexion réussie pour l'utilisateur: {}", username);
+            
+         // Journaliser l'événement de connexion réussie
+            auditService.logAuthentication(username, "LOGIN_SUCCESS", true, 
+                                         "Connexion réussie", request);
             
             // Obtenir le contexte de l'application depuis la requête
             String contextPath = request.getContextPath();
@@ -46,10 +58,46 @@ public class SecurityConfig {
         };
     }
     
+ // Nouveau handler pour les échecs d'authentification
+    @Bean
+    public AuthenticationFailureHandler authenticationFailureHandler() {
+        return (request, response, exception) -> {
+            String username = request.getParameter("username");
+            log.warn("Échec de connexion pour l'utilisateur: {} - Raison: {}", 
+                     username, exception.getMessage());
+            
+            // Journaliser l'événement d'échec
+            auditService.logAuthentication(username, "LOGIN_FAILED", false, 
+                                         "Échec d'authentification: " + exception.getMessage(), 
+                                         request);
+            
+            response.sendRedirect(request.getContextPath() + "/login?error=true");
+        };
+    }
+    /**  à implémenter apres configuration nom domaine
+ // Configuration CORS
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+        configuration.setAllowedOrigins(List.of("http://localhost:8080", "https://votre-domaine.com"));
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "X-Requested-With"));
+        configuration.setAllowCredentials(true);
+        
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+        return source;
+    }
+    
+    **/
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
             .csrf(AbstractHttpConfigurer::disable)
+            /** à decomenter apres configration du domain et le CORS
+         // Activer CORS
+            .cors(cors ->
+            */
             .authorizeHttpRequests(authz -> authz
                 // Pages publiques
                 .requestMatchers("/", "/login", "/register", "/css/**", "/js/**","/select2/**","/images/**").permitAll()
@@ -70,8 +118,9 @@ public class SecurityConfig {
               
                 // Sécurité - nécessite des permissions spécifiques
                 .requestMatchers("/securite/**").hasAnyAuthority(
-                    "SECURITE_LIRE", "SECURITE_CREER", "SECURITE_MODIFIER", "SECURITE_SUPPRIMER"
-                )
+                		"SECURITE_LIRE", "SECURITE_CREER", "SECURITE_MODIFIER", 
+                        "SECURITE_SUPPRIMER", "SECURITE_GESTION_PERMISSIONS", "SECURITE_ASSIGNER_ROLES"
+               )
                 
                 // Contact - nécessite des permissions spécifiques
                 .requestMatchers("/contact/**").hasAnyAuthority(
@@ -116,11 +165,13 @@ public class SecurityConfig {
                 .defaultSuccessUrl("/dashboard", true)
                 .successHandler(authenticationSuccessHandler())
                 .failureUrl("/login?error=true")
+                .failureHandler(authenticationFailureHandler())
                 .permitAll()
             )
             .logout(logout -> logout
-                .logoutRequestMatcher(request -> request.getRequestURI().equals("/logout"))
-                .logoutSuccessUrl("/login?logout=true")
+               // .logoutRequestMatcher(request -> request.getRequestURI().equals("/logout"))
+            	.logoutRequestMatcher(new AntPathRequestMatcher("/logout", "POST"))  // 🔑 Méthode POST + URI
+            	.logoutSuccessUrl("/login?logout=true")
                 .invalidateHttpSession(true)
                 .deleteCookies("JSESSIONID")
                 .permitAll()
@@ -129,8 +180,20 @@ public class SecurityConfig {
                 .accessDeniedPage("/error/403")
             )
             .sessionManagement(session -> session
-                .maximumSessions(1)
-                .expiredUrl("/login?expired=true")
+            		.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
+            	    .invalidSessionUrl("/login?expired=true")
+            	    .sessionFixation().migrateSession()  // Protection contre les attaques de fixation de session
+            	    .maximumSessions(1)
+            	    .maxSessionsPreventsLogin(false)  // Permettre la nouvelle connexion et déconnecter l'ancienne
+            	    .expiredUrl("/login?expired=true")
+                
+            )
+          // le remember-me
+            .rememberMe(remember -> remember
+                .key("cle_securite_unique_erp_cos")
+                .tokenValiditySeconds(86400)                     // 1 jour
+                .rememberMeCookieName("remember-me-erp")
+                .userDetailsService(userDetailsService)
             );
         return http.build();
     }

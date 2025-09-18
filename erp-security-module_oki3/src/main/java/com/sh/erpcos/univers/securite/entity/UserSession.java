@@ -2,16 +2,22 @@ package com.sh.erpcos.univers.securite.entity;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 import lombok.AllArgsConstructor;
 
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "user_sessions" , indexes = {
+@Table(name = "user_sessions" , 
+		indexes = {
 	    @Index(name = "idx_date_expiration", columnList = "date_expiration")
 	})
-@Data
+@Getter
+@Setter
+@ToString
 @NoArgsConstructor
 @AllArgsConstructor
 public class UserSession {

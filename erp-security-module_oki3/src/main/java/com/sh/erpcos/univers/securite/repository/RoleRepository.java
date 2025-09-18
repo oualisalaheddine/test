@@ -1,6 +1,8 @@
 package com.sh.erpcos.univers.securite.repository;
 
 import com.sh.erpcos.univers.securite.entity.Role;
+
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -42,6 +44,10 @@ public interface RoleRepository extends JpaRepository<Role, Long> {
     
     @Query("SELECT COUNT(r) FROM Role r WHERE r.roleActif = true")
     long countRolesActifs();
+    
+    @EntityGraph(attributePaths = {"permissions"})
+    @Query("SELECT r FROM Role r WHERE r.nom = :nom")
+    Optional<Role> findByNomWithPermissions(@Param("nom") String nom);
     
     @Query("SELECT u FROM Utilisateur u JOIN u.roles r WHERE r.nom = :nomRole")
     List<com.sh.erpcos.univers.securite.entity.Utilisateur> findUtilisateursByRole(@Param("nomRole") String nomRole);

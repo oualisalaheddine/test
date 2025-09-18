@@ -376,6 +376,64 @@ public class PontBasculeController {
 	}
 
 
+	//======================================================================
+	// VEHICULES TARER - CRUD
+	//======================================================================
+
+	@GetMapping("/vehicules-tarer")
+	@PreAuthorize("hasAuthority('PONTBASCULE_LIRE')")
+	public String listVehiculesTarer(Model model) {
+	    model.addAttribute("vehicules", vehiculeTarerService.findAll());
+	    return "pontbascule/vehicules-tarer/index"; // Page listant les véhicules
+	}
+
+	@GetMapping("/vehicules-tarer/nouveau")
+	@PreAuthorize("hasAuthority('PONTBASCULE_CREER')")
+	public String newVehiculeTarer(Model model) {
+	    model.addAttribute("vehiculeTarer", new VehiculeTarer());
+	    return "pontbascule/vehicules-tarer/form"; // Formulaire de création
+	}
+
+	@PostMapping("/vehicules-tarer")
+	@PreAuthorize("hasAuthority('PONTBASCULE_CREER')")
+	public String createVehiculeTarer(@Valid @ModelAttribute VehiculeTarer vehiculeTarer, BindingResult br) {
+	    if (br.hasErrors()) {
+	        return "pontbascule/vehicules-tarer/form";
+	    }
+	    vehiculeTarerService.save(vehiculeTarer);
+	    return "redirect:/pontbascule/operations-internes/nouveau"; // Redirige vers le formulaire d'opération pour rafraîchir la liste
+	}
+
+	@GetMapping("/vehicules-tarer/{id}/modifier")
+	@PreAuthorize("hasAuthority('PONTBASCULE_MODIFIER')")
+	public String editVehiculeTarer(@PathVariable String id, Model model) {
+	    VehiculeTarer vehicule = vehiculeTarerService.findById(id)
+	            .orElseThrow(() -> new IllegalArgumentException("Véhicule introuvable pour l'id: " + id));
+	    model.addAttribute("vehiculeTarer", vehicule);
+	    return "pontbascule/vehicules-tarer/form"; // Formulaire de modification
+	}
+
+	@PostMapping("/vehicules-tarer/{id}/modifier")
+	@PreAuthorize("hasAuthority('PONTBASCULE_MODIFIER')")
+	public String updateVehiculeTarer(@PathVariable String id, @Valid @ModelAttribute VehiculeTarer vehiculeTarer, BindingResult br) {
+	    if (br.hasErrors()) {
+	        return "pontbascule/vehicules-tarer/form";
+	    }
+	    vehiculeTarer.setImmatriculation(id); // Assure que l'ID n'est pas modifié
+	    vehiculeTarerService.save(vehiculeTarer);
+	    return "redirect:/pontbascule/vehicules-tarer"; // Redirige vers la liste des véhicules
+	}
+/**
+ * en cas ou ,mais normallement pour les véhicule il n as pas lieu de supression violation de contrainte
+ * avec opération en cours interne ou externe
+	@PostMapping("/vehicules-tarer/{id}/supprimer")
+	@PreAuthorize("hasAuthority('PONTBASCULE_SUPPRIMER')")
+	public String deleteVehiculeTarer(@PathVariable String id) {
+	    vehiculeTarerService.deleteById(id);
+	    return "redirect:/pontbascule/vehicules-tarer"; // Redirige vers la liste des véhicules
+	}
+	
+	**/
 }
 
 

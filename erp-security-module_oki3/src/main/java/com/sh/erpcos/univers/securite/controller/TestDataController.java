@@ -20,7 +20,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
-@Controller
+//@Controller
 @RequestMapping("/securite/test")
 @RequiredArgsConstructor
 @Slf4j

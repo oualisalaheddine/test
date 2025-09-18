@@ -1,6 +1,9 @@
 package com.sh.erpcos.univers.securite.repository;
 
 import com.sh.erpcos.univers.securite.entity.Permission;
+import com.sh.erpcos.univers.securite.entity.Module;
+
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -10,7 +13,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface PermissionRepository extends JpaRepository<Permission, Long> {
+public interface PermissionRepository extends JpaRepository<Permission, Integer> {
     
     Optional<Permission> findByNom(String nom);
     
@@ -23,6 +26,8 @@ public interface PermissionRepository extends JpaRepository<Permission, Long> {
     List<Permission> findByNomAction(String nomAction);
     
     List<Permission> findByNomModuleAndNomAction(String nomModule, String nomAction);
+    
+    List<Permission> findByModule(Module module);
     
     @Query("SELECT p FROM Permission p WHERE p.nomModule = :nomModule AND p.permissionActif = true")
     List<Permission> findPermissionsActivesByModule(@Param("nomModule") String nomModule);
@@ -47,6 +52,10 @@ public interface PermissionRepository extends JpaRepository<Permission, Long> {
     
     @Query("SELECT COUNT(p) FROM Permission p WHERE p.nomModule = :nomModule AND p.permissionActif = true")
     long countPermissionsActivesByModule(@Param("nomModule") String nomModule);
+        
+    @EntityGraph(attributePaths = {"roles"})
+    @Query("SELECT p FROM Permission p WHERE p.nom = :nom")
+    Optional<Permission> findByNomWithRoles(@Param("nom") String nom);
     
     @Query("SELECT r FROM Role r JOIN r.permissions p WHERE p.nom = :nomPermission")
     List<com.sh.erpcos.univers.securite.entity.Role> findRolesByPermission(@Param("nomPermission") String nomPermission);

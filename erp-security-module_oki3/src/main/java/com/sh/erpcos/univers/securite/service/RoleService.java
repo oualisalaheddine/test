@@ -130,7 +130,7 @@ public class RoleService {
         log.info("Rôle désactivé avec succès: {}", role.getNom());
     }
     
-    public void ajouterPermission(Long roleId, Long permissionId) {
+    public void ajouterPermission(Long roleId, Integer permissionId) {
         log.info("Ajout de la permission {} au rôle {}", permissionId, roleId);
         
         Role role = roleRepository.findById(roleId)
@@ -144,7 +144,7 @@ public class RoleService {
         log.info("Permission ajoutée avec succès");
     }
     
-    public void retirerPermission(Long roleId, Long permissionId) {
+    public void retirerPermission(Long roleId, Integer permissionId) {
         log.info("Retrait de la permission {} du rôle {}", permissionId, roleId);
         
         Role role = roleRepository.findById(roleId)
@@ -158,7 +158,7 @@ public class RoleService {
         log.info("Permission retirée avec succès");
     }
     
-    public void assignerPermissions(Long roleId, Set<Long> permissionIds) {
+    public void assignerPermissions(Long roleId, Set<Integer> permissionIds) {
         log.info("Assignation des permissions {} au rôle {}", permissionIds, roleId);
         
         Role role = roleRepository.findById(roleId)

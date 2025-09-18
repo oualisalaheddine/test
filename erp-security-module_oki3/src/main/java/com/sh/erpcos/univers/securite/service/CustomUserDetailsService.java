@@ -1,5 +1,6 @@
 package com.sh.erpcos.univers.securite.service;
 
+import com.sh.erpcos.univers.securite.entity.Role;
 import com.sh.erpcos.univers.securite.entity.Utilisateur;
 import com.sh.erpcos.univers.securite.repository.UtilisateurRepository;
 import lombok.RequiredArgsConstructor;
@@ -24,15 +25,20 @@ public class CustomUserDetailsService implements UserDetailsService {
     
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        log.debug("Tentative de chargement de l'utilisateur: {}", username);
+        log.debug("Tentative de chargement de l'utilisateur avec permissions: {}", username);
         
-        Utilisateur utilisateur = utilisateurRepository.findByUsername(username)
+        Utilisateur utilisateur = utilisateurRepository.findByUsernameWithPermissions(username)
                 .orElseThrow(() -> {
                     log.warn("Utilisateur non trouvé: {}", username);
                     return new UsernameNotFoundException("Utilisateur non trouvé: " + username);
                 });
         
         log.debug("Utilisateur trouvé: {}", utilisateur.getUsername());
+        log.debug("Rôles trouvés: {}", utilisateur.getRoles().size());
+        
+        for (Role role : utilisateur.getRoles()) {
+            log.debug("Rôle: {} avec {} permissions", role.getNom(), role.getPermissions().size());
+        }
         
         return UserDetailsAdapter.toUserDetails(utilisateur);
     }

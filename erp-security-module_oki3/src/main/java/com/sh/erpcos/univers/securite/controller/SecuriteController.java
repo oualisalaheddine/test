@@ -219,7 +219,7 @@ public class SecuriteController {
             activiteItem.put("action", log.getAction());
             activiteItem.put("ressource", log.getRessource());
             activiteItem.put("timestamp", log.getDateAction());
-            activiteItem.put("succes", log.isSucces());
+            activiteItem.put("succes", log.getSucces());
             activite.add(activiteItem);
         }
         

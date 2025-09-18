@@ -109,6 +109,19 @@
             font-size: 2rem;
             color: white;
         }
+        .form-floating {
+    position: relative;
+}
+.toggle-password {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 10;
+    background: none;
+    border: none;
+    padding: 0;
+}
     </style>
 </head>
 <body>
@@ -149,6 +162,9 @@
                     <label for="password">
                         <i class="bi bi-lock"></i> Mot de passe
                     </label>
+                    <button type="button" class="btn btn-outline-secondary toggle-password" tabindex="-1">
+       					 <i class="bi bi-eye"></i>
+   					</button>
                 </div>
                 
                 <div class="form-check mb-3">
@@ -200,6 +216,22 @@
                 e.preventDefault();
                 alert('Veuillez remplir tous les champs.');
                 return false;
+            }
+        });
+        
+     // Fonction pour afficher/masquer le mot de passe
+        document.querySelector('.toggle-password').addEventListener('click', function() {
+            const passwordField = document.getElementById('password');
+            const icon = this.querySelector('i');
+            
+            if (passwordField.type === 'password') {
+                passwordField.type = 'text';
+                icon.classList.remove('bi-eye');
+                icon.classList.add('bi-eye-slash');
+            } else {
+                passwordField.type = 'password';
+                icon.classList.remove('bi-eye-slash');
+                icon.classList.add('bi-eye');
             }
         });
     </script>

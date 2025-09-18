@@ -1,15 +1,23 @@
 package com.sh.erpcos.univers.securite.entity;
 
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 import lombok.AllArgsConstructor;
 
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "audit_logs")
-@Data
+@Table(name = "audit_logs",
+uniqueConstraints = {
+	    @UniqueConstraint(name = "uk_session_id", columnNames = "session_id"),
+	 }
+	)
+@Getter
+@Setter
+@ToString
 @NoArgsConstructor
 @AllArgsConstructor
 public class AuditLog {
@@ -57,7 +65,7 @@ public class AuditLog {
     private CategorieAudit categorie;
     
     @Column(name = "succes")
-    private boolean succes = true;
+    private Boolean succes = true;
     
     @Column(name = "message_erreur", length = 500)
     private String messageErreur;

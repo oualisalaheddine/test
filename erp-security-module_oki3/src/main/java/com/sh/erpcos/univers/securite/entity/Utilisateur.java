@@ -2,7 +2,10 @@ package com.sh.erpcos.univers.securite.entity;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 import lombok.AllArgsConstructor;
 
 import java.time.LocalDateTime;
@@ -10,8 +13,15 @@ import java.util.HashSet;
 import java.util.Set;
 
 @Entity
-@Table(name = "utilisateurs")
-@Data
+@Table(name = "utilisateurs",
+uniqueConstraints = {
+    @UniqueConstraint(name = "uk_utilisateur_username", columnNames = "username"),
+    @UniqueConstraint(name = "uk_utilisateur_email", columnNames = "email")
+}
+)
+@Getter
+@Setter
+@ToString
 @NoArgsConstructor
 @AllArgsConstructor
 public class Utilisateur {
@@ -20,7 +30,7 @@ public class Utilisateur {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     
-    @Column(unique = true, nullable = false, length = 50)
+    @Column(nullable = false, length = 50)
     private String username;
     
     @Column(nullable = false)
@@ -32,7 +42,7 @@ public class Utilisateur {
     @Column(nullable = false, length = 100)
     private String prenom;
     
-    @Column(unique = true, nullable = false, length = 100)
+    @Column(nullable = false, length = 100)
     private String email;
     
     @Column(name = "date_creation")
@@ -53,7 +63,7 @@ public class Utilisateur {
     @Column(name = "credentials_non_expire")
     private boolean credentialsNonExpire = true;
     
-    @ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @ManyToMany(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinTable(
         name = "utilisateur_roles",
         joinColumns = @JoinColumn(name = "utilisateur_id"),

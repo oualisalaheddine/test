@@ -76,7 +76,7 @@ public class RoleController {
     @PostMapping("/nouveau")
     @PreAuthorize("hasAuthority('SECURITE_CREER')")
     public String creerRole(@ModelAttribute Role role,
-                           @RequestParam(required = false) Set<Long> permissionIds,
+                           @RequestParam(required = false) Set<Integer> permissionIds,
                            RedirectAttributes redirectAttributes) {
         try {
             // Créer le rôle
@@ -121,7 +121,7 @@ public class RoleController {
                 .orElseThrow(() -> new RuntimeException("Rôle non trouvé"));
         
         List<Permission> toutesLesPermissions = permissionService.getPermissionsActives();
-        Set<Long> permissionsRole = role.getPermissions().stream()
+        Set<Integer> permissionsRole = role.getPermissions().stream()
                 .map(Permission::getId)
                 .collect(Collectors.toSet());
         
@@ -137,7 +137,7 @@ public class RoleController {
     @PreAuthorize("hasAuthority('SECURITE_MODIFIER')")
     public String updateRole(@PathVariable Long id,
                             @ModelAttribute Role role,
-                            @RequestParam(required = false) Set<Long> permissionIds,
+                            @RequestParam(required = false) Set<Integer> permissionIds,
                             RedirectAttributes redirectAttributes) {
         try {
             // Mettre à jour le rôle
@@ -221,7 +221,7 @@ public class RoleController {
                 .orElseThrow(() -> new RuntimeException("Rôle non trouvé"));
         
         List<Permission> toutesLesPermissions = permissionService.getPermissionsActives();
-        Set<Long> permissionsRole = role.getPermissions().stream()
+        Set<Integer> permissionsRole = role.getPermissions().stream()
                 .map(Permission::getId)
                 .collect(Collectors.toSet());
         
@@ -235,7 +235,7 @@ public class RoleController {
     @PostMapping("/{id}/permissions")
     @PreAuthorize("hasAuthority('SECURITE_MODIFIER')")
     public String updatePermissionsRole(@PathVariable Long id,
-                                       @RequestParam(required = false) Set<Long> permissionIds,
+                                       @RequestParam(required = false) Set<Integer> permissionIds,
                                        RedirectAttributes redirectAttributes) {
         try {
             if (permissionIds != null) {

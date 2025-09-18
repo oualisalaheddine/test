@@ -310,7 +310,7 @@ public class BackupRestoreService {
             roleData.put("dateCreation", role.getDateCreation());
             
             // Sauvegarder les IDs des permissions
-            List<Long> permissionIds = role.getPermissions().stream()
+            List<Integer> permissionIds = role.getPermissions().stream()
                     .map(Permission::getId)
                     .toList();
             roleData.put("permissionIds", permissionIds);

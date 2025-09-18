@@ -16,8 +16,16 @@ import java.util.Optional;
 
 @Repository
 public interface UtilisateurRepository extends JpaRepository<Utilisateur, Long> {
+	
+
     
     Optional<Utilisateur> findByUsername(String username);
+    
+    @Query("SELECT u FROM Utilisateur u " +
+            "JOIN FETCH u.roles r " +
+            "JOIN FETCH r.permissions p " +
+            "WHERE u.username = :username")
+     Optional<Utilisateur> findByUsernameWithPermissions(@Param("username") String username);
     
     Optional<Utilisateur> findByEmail(String email);
     

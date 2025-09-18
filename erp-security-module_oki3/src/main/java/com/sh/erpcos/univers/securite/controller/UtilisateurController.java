@@ -99,7 +99,7 @@ public class UtilisateurController {
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("errorMessage", "Erreur lors de la création: " + e.getMessage());
             log.error("Erreur lors de la création de l'utilisateur: {}", e.getMessage());
-            return "redirect:" + request.getContextPath() + "/securite/utilisateurs/nouveau";
+            return "redirect:/securite/utilisateurs/nouveau";
         }
     }
     
@@ -159,12 +159,12 @@ public class UtilisateurController {
                 "Utilisateur '" + updatedUtilisateur.getUsername() + "' modifié avec succès.");
             
             log.info("Utilisateur modifié avec succès: {}", updatedUtilisateur.getUsername());
-            return "redirect:" + request.getContextPath() + "/securite/utilisateurs";
+            return "redirect:/securite/utilisateurs";
             
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("errorMessage", "Erreur lors de la modification: " + e.getMessage());
             log.error("Erreur lors de la modification de l'utilisateur {}: {}", id, e.getMessage());
-            return "redirect:" + request.getContextPath() + "/securite/utilisateurs/" + id + "/modifier";
+            return "redirect:/securite/utilisateurs/" + id + "/modifier";
         }
     }
     
@@ -181,7 +181,7 @@ public class UtilisateurController {
                 "Utilisateur '" + utilisateur.getUsername() + "' supprimé avec succès.");
             
             log.info("Utilisateur supprimé avec succès: {}", utilisateur.getUsername());
-            return "redirect:" + request.getContextPath() + "/securite/utilisateurs";
+            return "redirect:/securite/utilisateurs";
             
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("errorMessage", "Erreur lors de la suppression: " + e.getMessage());

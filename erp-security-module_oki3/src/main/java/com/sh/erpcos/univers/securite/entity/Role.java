@@ -2,7 +2,10 @@ package com.sh.erpcos.univers.securite.entity;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 import lombok.AllArgsConstructor;
 
 import java.time.LocalDateTime;
@@ -11,7 +14,9 @@ import java.util.Set;
 
 @Entity
 @Table(name = "roles")
-@Data
+@Getter
+@Setter
+@ToString
 @NoArgsConstructor
 @AllArgsConstructor
 public class Role {
@@ -36,12 +41,14 @@ public class Role {
     @OneToMany(mappedBy = "roleParent", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private Set<Role> rolesEnfants = new HashSet<>();
     
-    @ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @ManyToMany(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinTable(
         name = "role_permissions",
         joinColumns = @JoinColumn(name = "role_id"),
         inverseJoinColumns = @JoinColumn(name = "permission_id")
     )
+    
+    
     private Set<Permission> permissions = new HashSet<>();
     
     @Column(name = "role_actif")
