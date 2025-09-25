@@ -10,12 +10,14 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+
+
+
 public class OperationEnCoursInterne {
 
 	@Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
-
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer id;
 	
 	//private String immatriculation;
 

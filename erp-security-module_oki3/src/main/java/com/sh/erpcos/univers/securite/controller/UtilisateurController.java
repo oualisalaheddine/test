@@ -15,6 +15,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -35,7 +36,7 @@ public class UtilisateurController {
         model.addAttribute("utilisateurs", utilisateurs);
         model.addAttribute("nombreUtilisateurs", utilisateurs.size());
         model.addAttribute("nombreUtilisateursActifs", utilisateurService.getNombreUtilisateursActifs());
-        
+       
         log.info("Affichage de la liste des utilisateurs: {} utilisateurs", utilisateurs.size());
         return "securite/utilisateurs/liste";
     }
@@ -44,10 +45,11 @@ public class UtilisateurController {
     @PreAuthorize("hasAuthority('SECURITE_LIRE')")
     public String listUtilisateursActifs(Model model) {
         List<Utilisateur> utilisateurs = utilisateurService.getUtilisateursActifs();
+        Long utilisateursActifs = utilisateurService.getNombreUtilisateursActifs();
         model.addAttribute("utilisateurs", utilisateurs);
         model.addAttribute("nombreUtilisateurs", utilisateurs.size());
         model.addAttribute("titre", "Utilisateurs Actifs");
-        
+        model.addAttribute("nombreUtilisateursActifs", utilisateursActifs );
         log.info("Affichage de la liste des utilisateurs actifs: {} utilisateurs", utilisateurs.size());
         return "securite/utilisateurs/liste";
     }
@@ -229,6 +231,11 @@ public class UtilisateurController {
                 .map(Role::getId)
                 .collect(Collectors.toSet());
         
+     // Map<Long, String> pour id -> nom 
+        Map<Long, String> mapIdToNomRole = tousLesRoles.stream()
+                .collect(Collectors.toMap(Role::getId, Role::getNom));
+        
+        model.addAttribute("mapIdToNomRole", mapIdToNomRole);
         model.addAttribute("utilisateur", utilisateur);
         model.addAttribute("roles", tousLesRoles);
         model.addAttribute("rolesUtilisateur", rolesUtilisateur);
@@ -257,6 +264,6 @@ public class UtilisateurController {
             log.error("Erreur lors de la mise à jour des rôles pour l'utilisateur {}: {}", id, e.getMessage());
         }
         
-        return "redirect:" + request.getContextPath() + "/securite/utilisateurs/" + id + "/roles";
+        return "redirect:/securite/utilisateurs/" + id + "/roles";
     }
 }

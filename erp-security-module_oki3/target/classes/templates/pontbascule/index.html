@@ -1,77 +1,169 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html lang="fr" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
-    <meta charset="UTF-8" />
-    <title>Pont Bascule</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestion du Pont Bascule</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
 </head>
 <body>
-<h1>Pont Bascule</h1>
+    <!-- Navigation principale -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#" th:href="@{/pontbascule}">
+                <i class="fas fa-weight-scale me-2"></i>Pont Bascule
+            </a>
+            
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <!-- Opérations Dropdown -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="operationsDropdown" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-clipboard-list me-1"></i>Opérations
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" th:href="@{/pontbascule/operations}">
+                                <i class="fas fa-list me-2"></i>Opérations terminées</a></li>
+                            <li><a class="dropdown-item" th:href="@{/pontbascule/operations-internes}">
+                                <i class="fas fa-truck me-2"></i>Opérations Internes</a></li>
+                            <li><a class="dropdown-item" th:href="@{/pontbascule/operations-externes}">
+                                <i class="fas fa-shipping-fast me-2"></i>Opérations Externes</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            
+                        </ul>
+                    </li>
+                    
+                    <!-- Véhicules Dropdown -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="vehiculesDropdown" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-truck me-1"></i>Véhicules
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" th:href="@{/pontbascule/vehicules-tarer}">
+                                <i class="fas fa-truck me-2"></i>Véhicules Internes</a></li>
+                            <li><a class="dropdown-item" th:href="@{/pontbascule/vehicules-externe}">
+                                <i class="fas fa-truck-moving me-2"></i>Véhicules Externes</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" th:href="@{/pontbascule/vehicules-tarer/nouveau}" sec:authorize="hasAuthority('PONTBASCULE_CREER')">
+                                <i class="fas fa-plus me-2"></i>Nouveau véhicule interne</a></li>
+                            <li><a class="dropdown-item" th:href="@{/pontbascule/vehicules-externe/nouveau}" sec:authorize="hasAuthority('PONTBASCULE_CREER')">
+                                <i class="fas fa-plus me-2"></i>Nouveau véhicule externe</a></li>
+                        </ul>
+                    </li>
+                    
+                    <!-- Produits -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="produitsDropdown" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-box me-1"></i>Produits
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" th:href="@{/pontbascule/produits}">
+                                <i class="fas fa-list me-2"></i>Liste des produits</a></li>
+                            <li><a class="dropdown-item" th:href="@{/pontbascule/produits/nouveau}" sec:authorize="hasAuthority('PONTBASCULE_CREER')">
+                                <i class="fas fa-plus me-2"></i>Nouveau produit</a></li>
+                        </ul>
+                    </li>
+                    
+                    <!-- Partenaires -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="partenairesDropdown" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-users me-1"></i>Partenaires
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" th:href="@{/pontbascule/partenaires}">
+                                <i class="fas fa-users me-2"></i>Liste des partenaires</a></li>
+                            <li><a class="dropdown-item" th:href="@{/pontbascule/type-partenaires}">
+                                <i class="fas fa-tags me-2"></i>Types de partenaires</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" th:href="@{/pontbascule/partenaires/nouveau}" sec:authorize="hasAuthority('PONTBASCULE_CREER')">
+                                <i class="fas fa-plus me-2"></i>Nouveau partenaire</a></li>
+                        </ul>
+                    </li>
+                    
+                    <!-- Statistiques -->
+                    <li class="nav-item">
+                        <a class="nav-link" th:href="@{/pontbascule/statistiques}">
+                            <i class="fas fa-chart-bar me-1"></i>Statistiques
+                        </a>
+                    </li>
+                </ul>
+                
+                <!-- Boutons d'action rapide -->
+                <div class="d-flex">
+                    <div class="dropdown me-2">
+                        <button class="btn btn-success dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-plus me-1"></i>Nouveau
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" th:href="@{/pontbascule/operations-internes/nouveau}">
+                                <i class="fas fa-truck me-2"></i>Opération Interne</a></li>
+                            <li><a class="dropdown-item" th:href="@{/pontbascule/operations-externes/nouveau}">
+                                <i class="fas fa-shipping-fast me-2"></i>Opération Externe</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
 
-<h2>Produits</h2>
-<a th:href="@{/pontbascule/produits/nouveau}">Nouveau produit</a>
-<table border="1">
-    <tr><th>ID</th><th>Désignation</th><th>Actions</th></tr>
-    <tr th:each="p : ${produits}">
-        <td th:text="${p.idProduit}"></td>
-        <td th:text="${p.designationProduit}"></td>
-        <td>
-            <a th:href="@{'/pontbascule/produits/' + ${p.idProduit} + '/modifier'}">Modifier</a>
-            <form th:action="@{'/pontbascule/produits/' + ${p.idProduit} + '/supprimer'}" method="post" style="display:inline">
-                <button type="submit">Supprimer</button>
-            </form>
-        </td>
-    </tr>
-    </table>
+    <!-- Contenu principal -->
+    <div class="container-fluid mt-4">
+        <!-- En-tête de bienvenue -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="jumbotron bg-light p-4 rounded">
+                    <h1 class="display-4">
+                        <i class="fas fa-weight-scale me-3 text-primary"></i>
+                        Gestion du Pont Bascule
+                    </h1>
+                    <p class="lead">Système de pesage et gestion des opérations</p>
+                    <hr class="my-4">
+                    <div class="row text-center">
+                        <div class="col-md-3">
+                            <div class="card border-primary">
+                                <div class="card-body">
+                                    <h5 class="card-title text-primary" th:text="${#lists.size(produits)}">0</h5>
+                                    <p class="card-text">Produits</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card border-success">
+                                <div class="card-body">
+                                    <h5 class="card-title text-success" th:text="${#lists.size(partenaires)}">0</h5>
+                                    <p class="card-text">Partenaires</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card border-warning">
+                                <div class="card-body">
+                                    <h5 class="card-title text-warning" th:text="${#lists.size(operations)}">0</h5>
+                                    <p class="card-text">Opérations</p>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- 
+                        <div class="col-md-3">
+                            <div class="card border-info">
+                                <div class="card-body">
+                                    <h5 class="card-title text-info">24h</h5>
+                                    <p class="card-text">Disponible</p>
+                                </div>
+                            </div>
+                        </div>
+                         -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
-<h2>Partenaires</h2>
-<a th:href="@{/pontbascule/partenaires/nouveau}">Nouveau partenaire</a>
-<table border="1">
-    <tr><th>ID</th><th>Raison sociale</th><th>Actions</th></tr>
-    <tr th:each="pt : ${partenaires}">
-        <td th:text="${pt.id}"></td>
-        <td th:text="${pt.raisonSociale}"></td>
-        <td>
-            <a th:href="@{'/pontbascule/partenaires/' + ${pt.id} + '/modifier'}">Modifier</a>
-            <form th:action="@{'/pontbascule/partenaires/' + ${pt.id}}" method="post" style="display:inline">
-                <button type="submit">Enregistrer</button>
-            </form>
-            <form th:action="@{'/pontbascule/partenaires/' + ${pt.id} + '/supprimer'}" method="post" style="display:inline">
-                <button type="submit">Supprimer</button>
-            </form>
-        </td>
-    </tr>
-    </table>
-
-<h2>Opérations</h2>
-<a th:href="@{/pontbascule/operations/nouveau}">Nouvelle opération</a>
-<table border="1">
-    <tr>
-        <th>ID</th><th>Date</th><th>Heure</th><th>Produit</th><th>Partenaire</th>
-        <th>Type</th><th>Immat</th><th>P1</th><th>P2</th><th>Net</th><th>Qté</th><th>Écart</th><th>Actions</th>
-    </tr>
-    <tr th:each="op : ${operations}">
-        <td th:text="${op.id}"></td>
-        <td th:text="${op.dateOperation}"></td>
-        <td th:text="${op.heureOperation}"></td>
-        <td th:text="${op.produit != null ? op.produit.designationProduit : ''}"></td>
-        <td th:text="${op.partenaire != null ? op.partenaire.raisonSociale : ''}"></td>
-        <td th:text="${op.typeOperation != null ? op.typeOperation.libelle : ''}"></td>
-        <td th:text="${op.immatriculation}"></td>
-        <td th:text="${op.peser1}"></td>
-        <td th:text="${op.peser2}"></td>
-        <td th:text="${op.poidsNet}"></td>
-        <td th:text="${op.qteDeclare}"></td>
-        <td th:text="${op.ecart}"></td>
-        <td>
-            <a th:href="@{'/pontbascule/operations/' + ${op.id} + '/modifier'}">Modifier</a>
-            <form th:action="@{'/pontbascule/operations/' + ${op.id} + '/supprimer'}" method="post" style="display:inline">
-                <button type="submit">Supprimer</button>
-            </form>
-        </td>
-    </tr>
-    </table>
-
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
-
-

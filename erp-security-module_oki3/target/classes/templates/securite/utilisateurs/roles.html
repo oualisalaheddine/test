@@ -72,7 +72,7 @@
             <h4>Rôles Actuellement Assignés</h4>
             <div th:if="${rolesUtilisateur != null and !rolesUtilisateur.empty}">
                 <span th:each="roleId : ${rolesUtilisateur}" class="role-badge" 
-                      th:text="${roles.stream().filter(r -> r.id == roleId).findFirst().orElse(null)?.nom}"></span>
+                      th:text="${mapIdToNomRole[roleId]}"></span>
             </div>
             <div th:if="${rolesUtilisateur == null or rolesUtilisateur.empty}" style="color: #666; font-style: italic;">
                 Aucun rôle assigné.

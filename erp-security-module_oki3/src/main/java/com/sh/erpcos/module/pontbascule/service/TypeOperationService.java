@@ -26,6 +26,10 @@ public class TypeOperationService {
 	public TypeOperation save(TypeOperation v) { return repository.save(v); }
 
 	public void deleteById(Integer id) { repository.deleteById(id); }
+	
+	public List<TypeOperation> findAllOrderByLibelle() {
+	    return repository.findAllByOrderByLibelleAsc();
+	}
 }
 
 

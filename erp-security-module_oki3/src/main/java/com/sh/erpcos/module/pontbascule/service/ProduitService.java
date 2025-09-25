@@ -25,6 +25,11 @@ public class ProduitService {
 	public Produit save(Produit produit) { return produitRepository.save(produit); }
 
 	public void deleteById(Long id) { produitRepository.deleteById(id); }
+	
+	
+	public List<Produit> findAllOrderByDesignation() {
+	    return produitRepository.findAllByOrderByDesignationProduitAsc();
+	}
 }
 
 

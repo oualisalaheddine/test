@@ -17,7 +17,7 @@ public class TypePartenaire {
 	private Long id;
 
 	@Column(nullable = false, length = 50)
-	private String libelle; // CLIENT | FOURNISSEUR
+	private String libelle; // CLIENT | FOURNISSEUR.......AUTRES
 }
 
 

@@ -11,7 +11,7 @@
 </head>
 <body>
 <div class="container mt-4">
-      <h1 th:text="${operationInterne.id != 0 ? 'Modifier Opération Interne' : 'Nouvelle Opération Interne'}"></h1>
+      <h1 th:text="${operationInterne.id != null ? 'Modifier Opération Interne' : 'Nouvelle Opération Interne'}"></h1>
     <form th:action="@{${operationInterne.id == null}
            ? '/pontbascule/operations-internes'
            : '/pontbascule/operations-internes/' + ${operationInterne.id}}"
@@ -28,7 +28,7 @@
             <div class="text-danger" th:if="${#fields.hasErrors('vehiculeTarer')}" th:errors="*{vehiculeTarer}"></div>
         </div>
         <a th:href="@{/pontbascule/vehicules-tarer/nouveau}" class="btn btn-link">Créer un nouveau véhicule</a>
-        <button type="submit" class="btn btn-success"> <span th:text="${operationInterne.id != 0 ? 'modifier' : 'Enregistrer'}"> </span></button>
+        <button type="submit" class="btn btn-success"> <span th:text="${operationInterne.id != null ? 'modifier' : 'Enregistrer'}"> </span></button>
         <a th:href="@{/pontbascule/operations-internes}" class="btn btn-secondary">Annuler</a>
     </form>
 </div>

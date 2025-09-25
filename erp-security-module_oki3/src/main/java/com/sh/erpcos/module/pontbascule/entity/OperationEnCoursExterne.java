@@ -20,8 +20,10 @@ public class OperationEnCoursExterne {
 	@JoinColumn(name = "vehicules_externe_immatriculation")
 	private VehiculeExterne vehiculeExterne;
 
-	@Column(nullable = false)
-	private Integer peser1; // > 0
+	@Column
+	private Integer peser_charger; // > 0
+	@Column
+	private Integer peser_vide; // > 0
 }
 
 

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard - ERP Security</title>
+    <title>Dashboard - ERP COS</title>
     
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -137,7 +137,7 @@
             <nav class="col-md-3 col-lg-2 d-md-block bg-dark sidebar collapse" style="min-height: 100vh;">
                 <div class="position-sticky pt-3">
                     <div class="text-center mb-4">
-                        <h4 class="text-white">ERP Security</h4>
+                        <h4 class="text-white">ERP COS</h4>
                         <small class="text-white-50">Gestion des accès</small>
                     </div>
                     
@@ -273,10 +273,10 @@
                 <!-- Welcome Section -->
                 <div class="welcome-section">
                     <h1 class="welcome-title">Bienvenue, <span sec:authentication="name">Utilisateur</span> !</h1>
-                    <p class="welcome-subtitle">Voici un aperçu de votre tableau de bord ERP Security</p>
+                    <p class="welcome-subtitle">Voici un aperçu de votre tableau de bord ERP COS</p>
                 </div>
-                
-                <!-- Statistics Cards -->
+           <!--      
+                <!-- Statistics Cards
                 <div class="row mb-4">
                     <div class="col-xl-3 col-md-6 mb-4">
                         <div class="stats-card">
@@ -313,12 +313,12 @@
                             <div class="stats-icon" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);">
                                 <i class="bi bi-shield-check"></i>
                             </div>
-                            <div class="stats-number">8</div>
+                            <div class="stats-number">9</div>
                             <div class="stats-label">Modules Disponibles</div>
                         </div>
                     </div>
                 </div>
-                
+                --> 
                 <!-- Modules Grid -->
                 <div class="row mb-4">
                     <div class="col-12">
@@ -401,6 +401,17 @@
                             <p class="module-description">Gestion des achats et fournisseurs</p>
                         </a>
                     </div>
+                    
+                    <!-- Module Pont Bascule -->
+<div class="col-lg-3 col-md-4 col-sm-6 mb-4" sec:authorize="hasAuthority('PONTBASCULE_LIRE')">
+    <a th:href="@{/pontbascule}" class="module-card">
+        <div class="module-icon" style="background: linear-gradient(135deg,#f8ffae 0%,#43c6ac 100%);">
+            <i class="bi bi-truck"></i>
+        </div>
+        <h5 class="module-title">Pont Bascule</h5>
+        <p class="module-description">Gestion des pesées et des entrées/sorties</p>
+    </a>
+</div>
                 </div>
                 
                    <!-- Footer ou section d'information -->

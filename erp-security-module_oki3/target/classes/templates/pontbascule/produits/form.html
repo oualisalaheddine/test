@@ -1,19 +1,31 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="UTF-8" />
     <title>Produit</title>
+    <link rel="stylesheet" th:href="@{/css/bootstrap.min.css}" />
 </head>
 <body>
-<h1>Produit</h1>
-<form th:object="${produit}" th:action="${produit.idProduit} != null ? @{'/pontbascule/produits/' + ${produit.idProduit}} : @{/pontbascule/produits}" method="post">
-    <label>Désignation</label>
-    <input type="text" th:field="*{designationProduit}" />
-    <div th:if="${#fields.hasErrors('designationProduit')}" th:errors="*{designationProduit}"></div>
-    <button type="submit">Enregistrer</button>
-    <a th:href="@{/pontbascule}">Retour</a>
-    </form>
+    <div class="container mt-4">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h5 th:text="${produit.idProduit != null} ? 'Modification du produit' : 'Nouveau produit'"></h5>
+            </div>
+            <div class="card-body">
+                <form th:action="|@{/pontbascule/produits}${produit.idProduit != null ? '/' + produit.idProduit : ''}|"
+                      th:object="${produit}" method="post">
+                    <div class="mb-3">
+                        <label for="designationProduit" class="form-label">Désignation</label>
+                        <input type="text" class="form-control" id="designationProduit" th:field="*{designationProduit}" required maxlength="150">
+                        <div class="text-danger" th:if="${#fields.hasErrors('designationProduit')}" th:errors="*{designationProduit}"></div>
+                    </div>
+                    <div class="mt-4">
+                        <button type="submit" class="btn btn-primary">Enregistrer</button>
+                        <a th:href="@{/pontbascule/produits}" class="btn btn-secondary">Annuler</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <script th:src="@{/js/bootstrap.bundle.min.js}"></script>
 </body>
 </html>
-
-

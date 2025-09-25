@@ -94,9 +94,13 @@
                     <a th:href="@{/securite/utilisateurs/nouveau}" class="btn btn-primary">
                         <i class="fas fa-user-plus me-2"></i>Nouvel Utilisateur
                     </a>
-                    <a th:href="@{/securite/utilisateurs/actifs}" class="btn btn-success ms-2">
+                     <a th:href="@{/securite/utilisateurs}" class="btn btn-outline-secondary ms-2">
+                        <i class="fas fa-user-check me-2"></i>Tous les Utilisateurs
+                    </a>
+                    <a th:href="@{/securite/utilisateurs/actifs}" class="btn btn-outline-success ms-2">
                         <i class="fas fa-user-check me-2"></i>Utilisateurs Actifs
                     </a>
+                    
                 </div>
                 <div class="col-md-6">
                     <form th:action="@{/securite/utilisateurs/recherche}" method="get">

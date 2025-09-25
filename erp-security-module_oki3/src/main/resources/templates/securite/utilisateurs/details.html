@@ -139,10 +139,10 @@
                     <div class="info-row">
                         <div class="info-label">Identifiants non expirés:</div>
                         <div class="info-value">
-                            <span th:if="${utilisateur.credentialsNonExpires}" class="badge bg-success">
+                            <span th:if="${utilisateur.credentialsNonExpire}" class="badge bg-success">
                                 <i class="fas fa-check me-1"></i>Oui
                             </span>
-                            <span th:unless="${utilisateur.credentialsNonExpires}" class="badge bg-warning">
+                            <span th:unless="${utilisateur.credentialsNonExpire}" class="badge bg-warning">
                                 <i class="fas fa-exclamation me-1"></i>Non
                             </span>
                         </div>

@@ -25,6 +25,10 @@ public class PartenaireService {
 	public Partenaire save(Partenaire partenaire) { return partenaireRepository.save(partenaire); }
 
 	public void deleteById(Long id) { partenaireRepository.deleteById(id); }
+	
+	public List<Partenaire> findAllOrderByRaisonSociale() {
+	    return partenaireRepository.findAllByOrderByRaisonSocialeAsc();
+	}
 }
 
 

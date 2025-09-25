@@ -53,7 +53,7 @@
                     <td>
                         <a th:href="@{/pontbascule/operations-internes/{id}/modifier(id=${opInt.id})}"
                            class="btn btn-warning btn-sm">Modifier</a>
-                        <a th:href="@{/pontbascule/operations/nouveau(operationInterneId=${opInt.id})}"
+                        <a th:href="@{/pontbascule/operations/nouveauI(operationInterneId=${opInt.id})}"
                            class="btn btn-primary btn-sm">Continuer</a>
                         <form th:action="@{/pontbascule/operations-internes/{id}/supprimer(id=${opInt.id})}"
                               method="post" class="d-inline">
@@ -77,7 +77,8 @@
                 <tr>
                     <th>ID</th>
                     <th>Immatriculation</th>
-                    <th>Peser1</th>
+                    <th>Peser_Vide</th>
+                    <th>Peser_charger</th>
                     <th>Actions</th>
                 </tr>
                 </thead>
@@ -85,12 +86,13 @@
                 <tr th:each="opExt : ${operationsExternes}">
                     <td th:text="${opExt.id}"></td>
                     <td th:text="${opExt.vehiculeExterne.immatriculation != null ? opExt.vehiculeExterne.immatriculation : 'Non défini'}"></td>
-                    <td th:text="${opExt.vehiculeExterne != null ? opExt.peser1 : 'Non défini'}"></td>
+                    <td th:text="${opExt.vehiculeExterne != null ? opExt.peser_vide : 'Non défini'}"></td>
+                    <td th:text="${opExt.vehiculeExterne != null ? opExt.peser_charger : 'Non défini'}"></td>
                     <td>
                         <a th:href="@{/pontbascule/operations-externes/{id}/modifier(id=${opExt.id})}"
                            class="btn btn-warning btn-sm">Modifier</a>
                            
-                           <a th:href="@{/pontbascule/operations/nouveau(operationInterneId=${opExt.id})}"
+                           <a th:href="@{/pontbascule/operations/nouveauE(operationInterneId=${opExt.id})}"
                            class="btn btn-primary btn-sm">Continuer</a>
                            
                         <form th:action="@{/pontbascule/operations-externes/{id}/supprimer(id=${opExt.id})}"

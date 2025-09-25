@@ -1,19 +1,57 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="UTF-8" />
     <title>Partenaire</title>
+    <link rel="stylesheet" th:href="@{/css/bootstrap.min.css}" />
+    <link rel="stylesheet" th:href="@{/select2/css/select2.min.css}"/>
 </head>
 <body>
-<h1>Partenaire</h1>
-<form th:object="${partenaire}" th:action="${partenaire.id} != null ? @{'/pontbascule/partenaires/' + ${partenaire.id}} : @{/pontbascule/partenaires}" method="post">
-    <label>Raison sociale</label>
-    <input type="text" th:field="*{raisonSociale}" />
-    <div th:if="${#fields.hasErrors('raisonSociale')}" th:errors="*{raisonSociale}"></div>
-    <button type="submit">Enregistrer</button>
-    <a th:href="@{/pontbascule}">Retour</a>
-    </form>
+<div class="container mt-4">
+    <div class="card">
+        <div class="card-header bg-primary text-white">
+            <h5 th:text="${partenaire.id != null} ? 'Modification du partenaire' : 'Nouveau partenaire'"></h5>
+        </div>
+        <div class="card-body">
+            <form th:action="|@{/pontbascule/partenaires}${partenaire.id != null ? '/' + partenaire.id : ''}|"
+                  th:object="${partenaire}" method="post">
+                <div class="mb-3">
+                    <label for="raisonSociale" class="form-label">Raison sociale</label>
+                    <input type="text" class="form-control" id="raisonSociale"
+                           th:field="*{raisonSociale}" required maxlength="150">
+                    <div class="text-danger" th:if="${#fields.hasErrors('raisonSociale')}" th:errors="*{raisonSociale}"></div>
+                </div>
+                <div class="mb-3">
+                    <label for="typePartenaire" class="form-label">Type de partenaire</label>
+                    <select id="typePartenaire" th:field="*{typePartenaire}" class="form-select">
+ <option value="" disabled selected>Choisir un type partenaire</option>
+ <option th:each="type : ${typePartenaires}"
+ th:value="${type.id}"
+ th:text="${type.libelle}"></option>
+</select>
+                    <div class="text-danger" th:if="${#fields.hasErrors('typePartenaire')}" th:errors="*{typePartenaire}"></div>
+                </div>
+                <div class="mt-4">
+                    <button type="submit" class="btn btn-primary">Enregistrer</button>
+                    <a th:href="@{/pontbascule/partenaires}" class="btn btn-secondary">Annuler</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<script th:src="@{/js/jquery-3.7.1.min.js}"></script>
+ 	<!-- <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>  -->
+ <script th:src ="@{/select2/js/select2.min.js}"></script>  
+<script th:src="@{/js/bootstrap.bundle.min.js}"></script>
+
+
+    <script>
+    $(document).ready(function() {
+        $('#typePartenaire').select2({
+            placeholder: "Choisir un Type Partenaire",
+            allowClear: true
+        });
+        
+    });
+</script>
 </body>
 </html>
-
-

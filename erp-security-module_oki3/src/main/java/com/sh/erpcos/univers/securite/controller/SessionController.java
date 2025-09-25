@@ -50,7 +50,7 @@ public class SessionController {
         LocalDateTime maintenant = LocalDateTime.now();
         model.addAttribute("sessionsLastWeek", sessionService.getSessionCountByPeriod(derniereSemaine, maintenant));
         
-        return "securite/sessions/index";
+        return "securite/sessions/dashboard";
     }
     
     @GetMapping("/search")

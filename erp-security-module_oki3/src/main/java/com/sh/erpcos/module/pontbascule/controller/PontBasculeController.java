@@ -5,7 +5,8 @@ import com.sh.erpcos.module.pontbascule.entity.OperationEnCoursExterne;
 import com.sh.erpcos.module.pontbascule.entity.OperationEnCoursInterne;
 import com.sh.erpcos.module.pontbascule.entity.Partenaire;
 import com.sh.erpcos.module.pontbascule.entity.Produit;
-import com.sh.erpcos.module.pontbascule.entity.TypeOperation;
+import com.sh.erpcos.module.pontbascule.entity.TypePartenaire;
+import com.sh.erpcos.module.pontbascule.entity.VehiculeExterne;
 import com.sh.erpcos.module.pontbascule.entity.VehiculeTarer;
 import com.sh.erpcos.module.pontbascule.service.OperationEncoursExterneService;
 import com.sh.erpcos.module.pontbascule.service.OperationEncoursInterneService;
@@ -13,6 +14,7 @@ import com.sh.erpcos.module.pontbascule.service.OperationService;
 import com.sh.erpcos.module.pontbascule.service.PartenaireService;
 import com.sh.erpcos.module.pontbascule.service.ProduitService;
 import com.sh.erpcos.module.pontbascule.service.TypeOperationService;
+import com.sh.erpcos.module.pontbascule.service.TypePartenaireService;
 import com.sh.erpcos.module.pontbascule.service.VehiculeExterneService;
 import com.sh.erpcos.module.pontbascule.service.VehiculeTarerService;
 import lombok.RequiredArgsConstructor;
@@ -25,7 +27,6 @@ import org.springframework.validation.BindingResult;
 import jakarta.validation.Valid;
 
 import java.time.LocalDate;
-import java.time.LocalTime;
 
 @Controller
 @RequestMapping("/pontbascule")
@@ -35,6 +36,7 @@ public class PontBasculeController {
 
 	private final ProduitService produitService;
 	private final PartenaireService partenaireService;
+	private final TypePartenaireService typePartenaireService ;
 	private final TypeOperationService typeOperationService;
 	private final OperationService operationService;
 	private final OperationEncoursExterneService operationEncoursExterneService;
@@ -56,7 +58,7 @@ public class PontBasculeController {
 	@PreAuthorize("hasAuthority('PONTBASCULE_LIRE')")
 	public String listProduits(Model model) {
 	    model.addAttribute("produits", produitService.findAll());
-	    return "pontbascule/produits/produits";
+	    return "pontbascule/produits/index";
 	}
 
 	@GetMapping("/produits/nouveau")
@@ -100,10 +102,19 @@ public class PontBasculeController {
 	}
 
 	// PARTENAIRES CRUD
+	
+	@GetMapping("/partenaires")
+	@PreAuthorize("hasAuthority('PONTBASCULE_LIRE')")
+	public String listPartenaires(Model model) {
+	    model.addAttribute("partenaires", partenaireService.findAll());
+	    return "pontbascule/partenaires/index";
+	}
+	
 	@GetMapping("/partenaires/nouveau")
 	@PreAuthorize("hasAuthority('PONTBASCULE_CREER')")
 	public String newPartenaire(Model model) {
 		model.addAttribute("partenaire", new Partenaire());
+		model.addAttribute("typePartenaires", typePartenaireService.findAll());
 		return "pontbascule/partenaires/form";
 	}
 
@@ -140,9 +151,18 @@ public class PontBasculeController {
 	}
 
 	// OPERATIONS CRUD
-	@GetMapping("/operations/nouveau")
+	
+	
+	@GetMapping ("/operations")
+	public String listOperations(Model model) {
+		model.addAttribute("produits", produitService.findAll());
+		model.addAttribute("partenaires", partenaireService.findAll());
+		model.addAttribute("operations", operationService.findAll());
+		return "pontbascule/operations/index";
+	}
+	@GetMapping("/operations/nouveauI")
 	@PreAuthorize("hasAuthority('PONTBASCULE_CREER')")
-	public String newOperation(@RequestParam(required = false) Integer operationInterneId,Model model) {
+	public String newOperationI(@RequestParam(required = false) Integer operationInterneId,Model model) {
 		/**
 		Operation operation = new Operation();
 		 if (operationInterneId != null) {
@@ -159,7 +179,39 @@ public class PontBasculeController {
 		 System.out.println("operationInterneId = " + operationInterneId);
 		return "pontbascule/operations/form";
 	**/
-		Operation operation = operationService.initFromInterne(operationInterneId);
+		Operation operation = operationService.initFromInterneI(operationInterneId);
+
+	    model.addAttribute("operation", operation);
+	    model.addAttribute("produits", produitService.findAllOrderByDesignation());
+	    model.addAttribute("partenaires", partenaireService.findAllOrderByRaisonSociale());
+	    model.addAttribute("types", typeOperationService.findAllOrderByLibelle());
+	    
+	    //model.addAttribute("produits", produitService.findAll());
+	  //  model.addAttribute("partenaires", partenaireService.findAll());
+	  //  model.addAttribute("types", typeOperationService.findAll());
+
+	    return "pontbascule/operations/form";
+	}
+	@GetMapping("/operations/nouveauE")
+	@PreAuthorize("hasAuthority('PONTBASCULE_CREER')")
+	public String newOperationE(@RequestParam(required = false) Integer operationInterneId,Model model) {
+		/**
+		Operation operation = new Operation();
+		 if (operationInterneId != null) {
+		        OperationEnCoursInterne operationInterne = operationEncoursInterneService.findById(operationInterneId)
+		                .orElseThrow(() -> new IllegalArgumentException("OperationEnCoursInterne introuvable"));
+		        operation.setImmatriculation(operationInterne.getVehiculeTarer().getImmatriculation());
+		        operation.setPeser1(operationInterne.getVehiculeTarer().getPeser1());
+		        System.out.println("operationInterneId = " + operationInterneId);
+		    }
+		 model.addAttribute("operation", operation);
+		model.addAttribute("produits", produitService.findAll());
+		model.addAttribute("partenaires", partenaireService.findAll());
+		model.addAttribute("types", typeOperationService.findAll());
+		 System.out.println("operationInterneId = " + operationInterneId);
+		return "pontbascule/operations/form";
+	**/
+		Operation operation = operationService.initFromInterneE(operationInterneId);
 
 	    model.addAttribute("operation", operation);
 	    model.addAttribute("produits", produitService.findAll());
@@ -168,6 +220,7 @@ public class PontBasculeController {
 
 	    return "pontbascule/operations/form";
 	}
+
 	/**
 	@PostMapping("/operations")
 	@PreAuthorize("hasAuthority('PONTBASCULE_CREER')")
@@ -225,13 +278,14 @@ public class PontBasculeController {
 **/
 	@GetMapping("/operations/{id}/modifier")
 	@PreAuthorize("hasAuthority('PONTBASCULE_MODIFIER')")
-	public String editOperation(@PathVariable Long id, Model model) {
+	public String editOperation(@PathVariable Long id,  Model model) {
 		Operation op = operationService.findById(id).orElseThrow();
 		model.addAttribute("operation", op);
 		model.addAttribute("produits", produitService.findAll());
 		model.addAttribute("partenaires", partenaireService.findAll());
 		model.addAttribute("types", typeOperationService.findAll());
-		return "pontbascule/operations/form";
+		System.out.println("id operation =--------" + id);
+	return "pontbascule/operations/form";
 	}
 
 	@PostMapping("/operations/{id}")
@@ -240,8 +294,21 @@ public class PontBasculeController {
 	                             @RequestParam Long produitId,
 	                             @RequestParam Long partenaireId,
 	                             @RequestParam Integer typeOperationId,
-	                             @ModelAttribute Operation operation) {
-		operation.setId(id);
+	                             @ModelAttribute Operation operation,
+	                             Authentication auth) {
+	//	operation.setId(id);
+		// Récupérer l'opération existante pour conserver les dates originales
+	    Operation existingOperation = operationService.findById(id).orElseThrow();
+	    
+	    // Conserver les dates originales
+	    operation.setId(id);
+	    operation.setDateOperation(existingOperation.getDateOperation()); // Garder la date originale
+	    operation.setHeureOperation(existingOperation.getHeureOperation()); // Garder l'heure originale
+	    operation.setCreeParId(existingOperation.getCreeParId()); // Garder le créateur de l opération originale
+	    
+	    // Mettre à jour dateAnnulation avec la date locale actuelle
+	    operation.setDateAnnulation(LocalDate.now()); // ou LocalDateTime.now() selon votre type
+	    operation.setAnnulerPar(auth != null ? auth.getName() : null);
 		operation.setProduit(produitService.findById(produitId).orElseThrow());
 		operation.setPartenaire(partenaireService.findById(partenaireId).orElseThrow());
 		operation.setTypeOperation(typeOperationService.findAll().stream()
@@ -253,6 +320,8 @@ public class PontBasculeController {
 		if (operation.getPoidsNet() != null && operation.getQteDeclare() != null) {
 			operation.setEcart(operation.getPoidsNet() - operation.getQteDeclare());
 		}
+		System.out.println("id operation =--------" + id);
+		
 		operationService.save(operation);
 		return "redirect:/pontbascule";
 	}
@@ -370,59 +439,116 @@ public class PontBasculeController {
 
 	@PostMapping("/operations-internes/{id}/supprimer")
 	@PreAuthorize("hasAuthority('PONTBASCULE_SUPPRIMER')")
-	public String deleteOperationInterne(@PathVariable int id) {
+	public String deleteOperationInterne(@PathVariable Integer id) {
 	    operationEncoursInterneService.deleteById(id);
 	    return "redirect:/pontbascule/operations-internes";
 	}
 
 
 	//======================================================================
-	// VEHICULES TARER - CRUD
-	//======================================================================
+		// VEHICULES TARER - CRUD
+		//======================================================================
 
-	@GetMapping("/vehicules-tarer")
-	@PreAuthorize("hasAuthority('PONTBASCULE_LIRE')")
-	public String listVehiculesTarer(Model model) {
-	    model.addAttribute("vehicules", vehiculeTarerService.findAll());
-	    return "pontbascule/vehicules-tarer/index"; // Page listant les véhicules
-	}
+		@GetMapping("/vehicules-tarer")
+		@PreAuthorize("hasAuthority('PONTBASCULE_LIRE')")
+		public String listVehiculesTarer(Model model) {
+		    model.addAttribute("vehicules", vehiculeTarerService.findAll());
+		    return "pontbascule/vehicules-tarer/index"; // Page listant les véhicules
+		}
 
-	@GetMapping("/vehicules-tarer/nouveau")
-	@PreAuthorize("hasAuthority('PONTBASCULE_CREER')")
-	public String newVehiculeTarer(Model model) {
-	    model.addAttribute("vehiculeTarer", new VehiculeTarer());
-	    return "pontbascule/vehicules-tarer/form"; // Formulaire de création
-	}
+		@GetMapping("/vehicules-tarer/nouveau")
+		@PreAuthorize("hasAuthority('PONTBASCULE_CREER')")
+		public String newVehiculeTarer(Model model) {
+		    model.addAttribute("vehiculeTarer", new VehiculeTarer());
+		    return "pontbascule/vehicules-tarer/form"; // Formulaire de création
+		}
 
-	@PostMapping("/vehicules-tarer")
-	@PreAuthorize("hasAuthority('PONTBASCULE_CREER')")
-	public String createVehiculeTarer(@Valid @ModelAttribute VehiculeTarer vehiculeTarer, BindingResult br) {
-	    if (br.hasErrors()) {
-	        return "pontbascule/vehicules-tarer/form";
-	    }
-	    vehiculeTarerService.save(vehiculeTarer);
-	    return "redirect:/pontbascule/operations-internes/nouveau"; // Redirige vers le formulaire d'opération pour rafraîchir la liste
-	}
+		@PostMapping("/vehicules-tarer")
+		@PreAuthorize("hasAuthority('PONTBASCULE_CREER')")
+		public String createVehiculeTarer(@Valid @ModelAttribute VehiculeTarer vehiculeTarer, BindingResult br) {
+		    if (br.hasErrors()) {
+		        return "pontbascule/vehicules-tarer/form";
+		    }
+		    vehiculeTarerService.save(vehiculeTarer);
+		    return "redirect:/pontbascule/operations-internes/nouveau"; // Redirige vers le formulaire d'opération pour rafraîchir la liste
+		}
 
-	@GetMapping("/vehicules-tarer/{id}/modifier")
-	@PreAuthorize("hasAuthority('PONTBASCULE_MODIFIER')")
-	public String editVehiculeTarer(@PathVariable String id, Model model) {
-	    VehiculeTarer vehicule = vehiculeTarerService.findById(id)
-	            .orElseThrow(() -> new IllegalArgumentException("Véhicule introuvable pour l'id: " + id));
-	    model.addAttribute("vehiculeTarer", vehicule);
-	    return "pontbascule/vehicules-tarer/form"; // Formulaire de modification
-	}
+		@GetMapping("/vehicules-tarer/{id}/modifier")
+		@PreAuthorize("hasAuthority('PONTBASCULE_MODIFIER')")
+		public String editVehiculeTarer(@PathVariable String id, Model model) {
+		    VehiculeTarer vehicule = vehiculeTarerService.findById(id)
+		            .orElseThrow(() -> new IllegalArgumentException("Véhicule introuvable pour l'id: " + id));
+		    model.addAttribute("vehiculeTarer", vehicule);
+		    return "pontbascule/vehicules-tarer/form"; // Formulaire de modification
+		}
 
-	@PostMapping("/vehicules-tarer/{id}/modifier")
-	@PreAuthorize("hasAuthority('PONTBASCULE_MODIFIER')")
-	public String updateVehiculeTarer(@PathVariable String id, @Valid @ModelAttribute VehiculeTarer vehiculeTarer, BindingResult br) {
-	    if (br.hasErrors()) {
-	        return "pontbascule/vehicules-tarer/form";
-	    }
-	    vehiculeTarer.setImmatriculation(id); // Assure que l'ID n'est pas modifié
-	    vehiculeTarerService.save(vehiculeTarer);
-	    return "redirect:/pontbascule/vehicules-tarer"; // Redirige vers la liste des véhicules
-	}
+		@PostMapping("/vehicules-tarer/{id}/modifier")
+		@PreAuthorize("hasAuthority('PONTBASCULE_MODIFIER')")
+		public String updateVehiculeTarer(@PathVariable String id, @Valid @ModelAttribute VehiculeTarer vehiculeTarer, BindingResult br) {
+		    if (br.hasErrors()) {
+		        return "pontbascule/vehicules-tarer/form";
+		    }
+		    vehiculeTarer.setImmatriculation(id); // Assure que l'ID n'est pas modifié
+		    vehiculeTarerService.save(vehiculeTarer);
+		    return "redirect:/pontbascule/vehicules-tarer"; // Redirige vers la liste des véhicules
+		}
+		
+		
+		//======================================================================
+		// VEHICULES Externe - CRUD
+		//======================================================================
+
+		@GetMapping("/vehicules-externe")
+		@PreAuthorize("hasAuthority('PONTBASCULE_LIRE')")
+		public String listVehiculesExterne(Model model) {
+		    model.addAttribute("vehicules", vehiculeExterneService.findAll());
+		    return "pontbascule/vehicules-externe/index"; // Page listant les véhicules
+		}
+
+		@GetMapping("/vehicules-externe/nouveau")
+		@PreAuthorize("hasAuthority('PONTBASCULE_CREER')")
+		public String newVehiculeExterne(Model model) {
+		    model.addAttribute("vehiculeExterne", new VehiculeExterne());
+		    return "pontbascule/vehicules-externe/form"; // Formulaire de création
+		}
+
+		@PostMapping("/vehicules-externe")
+		@PreAuthorize("hasAuthority('PONTBASCULE_CREER')")
+		public String createVehiculeExterne(@Valid @ModelAttribute VehiculeExterne vehiculeExterne, BindingResult br) {
+		    if (br.hasErrors()) {
+		        return "pontbascule/vehicules-externe/form";
+		    }
+		    vehiculeExterneService.save(vehiculeExterne);
+		    System.out.println("pas  de ' errer-------je suis dans new-----" );
+		    return "redirect:/pontbascule/vehicules-externe"; 
+		}
+
+		@GetMapping("/vehicules-externe/{id}/modifier")
+		@PreAuthorize("hasAuthority('PONTBASCULE_MODIFIER')")
+		public String editVehiculeExterne(@PathVariable String id, Model model) {
+		    VehiculeExterne vehicule = vehiculeExterneService.findById(id)
+		            .orElseThrow(() -> new IllegalArgumentException("Véhicule introuvable pour l'id: " + id));
+		    model.addAttribute("vehiculeExterne", vehicule);
+		    return "pontbascule/vehicules-externe/form"; // Formulaire de modification
+		}
+
+		@PostMapping("/vehicules-externe/{id}/modifier")
+		@PreAuthorize("hasAuthority('PONTBASCULE_MODIFIER')")
+		public String updateVehiculeExterne(@PathVariable String id, @Valid @ModelAttribute VehiculeExterne vehiculeExterne, BindingResult br) {
+		    if (br.hasErrors()) {
+		    	System.out.println("errer------------" + br.getErrorCount());
+		    	return "pontbascule/vehicules-externe/form";
+		      
+		    }
+		   // vehiculeExterne.setImmatriculation(id); // Assure que l'ID n'est pas modifié
+		    vehiculeExterneService.deleteById(id);
+		    vehiculeExterneService.save(vehiculeExterne);
+		    System.out.println("pas  de ' errer----je suis dans update-------" +  vehiculeExterne.getImmatriculation() + "id===" + id);
+		    return "redirect:/pontbascule/vehicules-externe"; // Redirige vers la liste des véhicules Externe
+		    		
+		}
+		
+	
 /**
  * en cas ou ,mais normallement pour les véhicule il n as pas lieu de supression violation de contrainte
  * avec opération en cours interne ou externe
@@ -434,6 +560,56 @@ public class PontBasculeController {
 	}
 	
 	**/
+	
+
+	//======================================================================
+	// TYPE PARTENAIRE - CRUD
+	//======================================================================
+
+	
+	@GetMapping("/type-partenaires")
+	@PreAuthorize("hasAuthority('PONTBASCULE_LIRE')")
+	public String listTypePartenaire(Model model) {
+	    model.addAttribute("typePartenaires", typePartenaireService.findAll());
+	    return "pontbascule/type-partenaires/index"; // Page listant les type de partenaires
+	}
+
+	@GetMapping("/type-partenaires/nouveau")
+	@PreAuthorize("hasAuthority('PONTBASCULE_CREER')")
+	public String newTypePartenaire(Model model) {
+	    model.addAttribute("typePartenaire", new TypePartenaire());
+	    return "pontbascule/type-partenaires/form"; // Formulaire de création
+	}
+
+	@PostMapping("/type-partenaires")
+	@PreAuthorize("hasAuthority('PONTBASCULE_CREER')")
+	public String createTypePartenaire(@Valid @ModelAttribute TypePartenaire typePartenaire, BindingResult br) {
+	    if (br.hasErrors()) {
+	        return "pontbascule//form";
+	    }
+	    typePartenaireService.save(typePartenaire);
+	    return "redirect:/pontbascule/type-partenaires"; 
+	}
+
+	@GetMapping("/type-partenaires/{id}/modifier")
+	@PreAuthorize("hasAuthority('PONTBASCULE_MODIFIER')")
+	public String editTypePartenaire(@PathVariable Long id, Model model) {
+	   TypePartenaire typePartenaire= typePartenaireService.findById(id)
+	            .orElseThrow(() -> new IllegalArgumentException("Type Partenaire introuvable pour l'id: " + id));
+	    model.addAttribute("typePartenaire", typePartenaire);
+	    return "pontbascule/type-partenaires/form"; // Formulaire de modification
+	}
+
+	@PostMapping("/type-partenaires/{id}/modifier")
+	@PreAuthorize("hasAuthority('PONTBASCULE_MODIFIER')")
+	public String updateTyepPartenaire(@PathVariable Long id, @Valid @ModelAttribute TypePartenaire typePartenaire, BindingResult br) {
+	    if (br.hasErrors()) {
+	        return "pontbascule/type-partenaires/form";
+	    }
+	    typePartenaire.setId(id); // Assure que l'ID n'est pas modifié
+	    typePartenaireService.save(typePartenaire);
+	    return "redirect:/pontbascule/vehicules-tarer"; // Redirige vers la liste des véhicules
+	}
 }
 
 

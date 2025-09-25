@@ -45,10 +45,15 @@
             <div class="text-danger" th:if="${#fields.hasErrors('vehiculeExterne')}" th:errors="*{vehiculeExterne}"></div>
         </div>
         <div class="mb-3">
-            <label for="peser1" class="form-label">Peser1</label>
+           
+            <label for="peser_charger" class="form-label">peser_charger</label>
        <!--      <input type="text" id="peser1" th:field="*{peser1}" class="form-control" />
             <div class="text-danger" th:if="${#fields.hasErrors('peser1')}" th:errors="*{peser1}"></div> -->
-       <input type="number" id="peser1" th:field="*{peser1}" class="form-control" required>
+       <input type="number" id="peser_charger" th:field="*{peser_charger}" class="form-control" >
+       
+       
+       <label for="peser_vide" class="form-label">peser_vide</label>
+       <input type="number" id="peser_vide" th:field="*{peser_vide}" class="form-control" >
         <div class="invalid-feedback">Veuillez entrer un poids valide (ex: 1200.50).</div>
     </div>
        

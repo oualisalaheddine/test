@@ -1,6 +1,8 @@
 package com.sh.erpcos.module.pontbascule.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -31,7 +33,9 @@ public class Operation {
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "type_operations_id")
 	private TypeOperation typeOperation;
-
+	
+	
+	
 	@Column(name = "date_operation")
 	private LocalDate dateOperation;
 
@@ -50,16 +54,10 @@ public class Operation {
 	@Column(name = "poids_net")
 	private Integer poidsNet;
 
-	@Column(name = "bl_numero")
-	private String blNumero;
-
-	@Column(name = "date_bl")
-	private LocalDate dateBl;
-
-	@Column(name = "facture_numero")
+	@Column(name = "facture_bl_numero")
 	private String factureNumero;
 
-	@Column(name = "date_facture")
+	@Column(name = "date_facture_bl")
 	private LocalDate dateFacture;
 
 	@Column(name = "qte_declare")
@@ -71,6 +69,11 @@ public class Operation {
 	@Column
 	private String commentaire;
 
+	@Column(name = "Chauffeur", nullable = false,length = 30)
+    @NotBlank(message = "Le nom du chauffeur est obligatoire")
+    @Size(min = 2, max = 30, message = "Le nom doit contenir entre 2 et 30 caractères")
+    private String chauffeur;
+	
 	@Column(name = "cree_par_id")
 	private String creeParId;
 
@@ -78,7 +81,7 @@ public class Operation {
 	private String annulerPar;
 
 	@Column(name = "date_annulation")
-	private LocalDateTime dateAnnulation;
+	private LocalDate dateAnnulation;
 	
 	@Transient
     private Integer operationEnCoursId;
