@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <title>Partenaire</title>
+</head>
+<body>
+<h1>Partenaire</h1>
+<form th:object="${partenaire}" th:action="${partenaire.id} != null ? @{'/pontbascule/partenaires/' + ${partenaire.id}} : @{/pontbascule/partenaires}" method="post">
+    <label>Raison sociale</label>
+    <input type="text" th:field="*{raisonSociale}" />
+    <div th:if="${#fields.hasErrors('raisonSociale')}" th:errors="*{raisonSociale}"></div>
+    <button type="submit">Enregistrer</button>
+    <a th:href="@{/pontbascule}">Retour</a>
+    </form>
+</body>
+</html>
+
+

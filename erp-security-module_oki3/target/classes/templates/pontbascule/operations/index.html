@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <title>Opération</title>
+</head>
+<body>
+
+
+
+<h2>Opérations</h2>
+
+<table border="1">
+    <tr>
+        <th>ID</th><th>Date</th><th>Heure</th><th>Produit</th><th>Partenaire</th>
+        <th>Type</th><th>Immat</th><th>P1</th><th>P2</th><th>Net</th><th>Qté</th><th>Écart</th>
+        <th>factureNumero</th>
+        <th>dateFacture</th>
+        <th>commentaire</th>
+        <th>cree Par</th>
+        <th>annuler Par</th>
+        <th>date Annulation</th>
+        <th>Actions</th>
+    </tr>
+    <tr th:each="op : ${operations}">
+        <td th:text="${op.id}"></td>
+        <td th:text="${op.dateOperation}"></td>
+        <td th:text="${op.heureOperation}"></td>
+        <td th:text="${op.produit != null ? op.produit.designationProduit : ''}"></td>
+        <td th:text="${op.partenaire != null ? op.partenaire.raisonSociale : ''}"></td>
+        <td th:text="${op.typeOperation != null ? op.typeOperation.libelle : ''}"></td>
+        <td th:text="${op.immatriculation}"></td>
+        <td th:text="${op.peser1}"></td>
+        <td th:text="${op.peser2}"></td>
+        <td th:text="${op.poidsNet}"></td>
+        <td th:text="${op.qteDeclare}"></td>
+        <td th:text="${op.ecart}"></td>
+        <td th:text="${op.factureNumero}"></td>
+        <td th:text="${op.dateFacture}"></td>
+        <td th:text="${op.commentaire}"></td>
+        <td th:text="${op.creeParId}"></td>
+        <td th:text="${op.annulerPar}"></td>
+        <td th:text="${op.dateAnnulation}"></td>
+      <td>
+            <a th:href="@{'/pontbascule/operations/' + ${op.id}  +'/modifier'}">Modifier</a>
+           
+        </td>
+    </tr>
+    </table>
+
+</body>
+</html>
+
+

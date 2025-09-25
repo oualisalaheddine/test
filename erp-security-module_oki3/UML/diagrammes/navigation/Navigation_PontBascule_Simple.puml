@@ -1,0 +1,35 @@
+@startuml Navigation_PontBascule_Simple
+skinparam backgroundColor white
+
+rectangle "Dashboard" as dash
+rectangle "Operations" as ops
+rectangle "Produits" as prod
+rectangle "Partenaires" as part
+rectangle "Op Internes" as opint
+rectangle "Op Externes" as opext
+rectangle "Vehicules Tarer" as vehtар
+rectangle "Vehicules Externes" as vehext
+rectangle "Types Part" as types
+
+dash --> ops
+dash --> prod
+dash --> part
+dash --> opint
+dash --> opext
+dash --> vehtар
+dash --> vehext
+dash --> types
+
+ops --> ops : CRUD
+prod --> prod : CRUD
+part --> part : CRUD
+opint --> opint : CRUD
+opext --> opext : CRUD
+vehtар --> vehtар : CRUD
+vehext --> vehext : CRUD
+types --> types : CRUD
+
+opint --> ops : Finaliser
+opext --> ops : Finaliser
+
+@enduml

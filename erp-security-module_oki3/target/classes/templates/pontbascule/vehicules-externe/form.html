@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Formulaire Véhicule Externe</title>
+    <link rel="stylesheet" th:href="@{/css/bootstrap.min.css}" />
+    <link rel="stylesheet" th:href="@{/select2/css/select2.min.css}"/>
+</head>
+<body>
+    <div class="container mt-4">
+        <h1 th:text="${vehiculeExterne.immatriculation != null ? 'Modifier Véhicule Externe' : 'Nouveau Véhicule Externe'}"></h1>
+        
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h5 th:text="${vehiculeExterne.immatriculation != null ? 'Modification d''un véhicule externe' : 'Création d''un nouveau véhicule externe'}"></h5>
+            </div>
+            
+            <div class="card-body">
+                <form th:action="@{${vehiculeExterne.immatriculation == null}
+                       ? '/pontbascule/vehicules-externe'
+                       : '/pontbascule/vehicules-externe/' + ${vehiculeExterne.immatriculation} + '/modifier'}"
+                      th:object="${vehiculeExterne}" method="post">
+                    
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label for="immatriculation" class="form-label">Immatriculation</label>
+                            <input type="text" class="form-control" id="immatriculation"
+                                   th:field="*{immatriculation}" 
+                                  
+                                   required>
+                            <div class="text-danger" th:if="${#fields.hasErrors('immatriculation')}"
+                                 th:errors="*{immatriculation}"></div>
+                        </div>
+                    </div>
+
+                    <div class="mt-4">
+                        <button type="submit" class="btn btn-primary">
+                            <span th:text="${vehiculeExterne.immatriculation != null ? 'Modifier' : 'Enregistrer'}"></span>
+                        </button>
+                        <a th:href="@{/pontbascule/vehicules-externe}" class="btn btn-secondary">Annuler</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script th:src="@{/js/jquery-3.7.1.min.js}"></script>
+    <script th:src="@{/js/bootstrap.bundle.min.js}"></script>
+</body>
+</html>

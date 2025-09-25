@@ -1,0 +1,28 @@
+@startuml Etats_Permissions_PontBascule
+!theme plain
+
+state "🔓 PONTBASCULE_LIRE" as LIRE {
+  state "Dashboard" as dash
+  state "Listes" as lists
+  state "Consultations" as consult
+}
+
+state "🆕 PONTBASCULE_CREER" as CREER {
+  state "Formulaires Nouveaux" as newForms
+  state "Création Entités" as create
+}
+
+state "✏️ PONTBASCULE_MODIFIER" as MODIFIER {
+  state "Formulaires Modification" as editForms
+  state "Mise à jour" as update
+}
+
+state "🗑️ PONTBASCULE_SUPPRIMER" as SUPPRIMER {
+  state "Suppression Entités" as delete
+}
+
+LIRE --> CREER : hasAuthority('PONTBASCULE_CREER')
+LIRE --> MODIFIER : hasAuthority('PONTBASCULE_MODIFIER') 
+LIRE --> SUPPRIMER : hasAuthority('PONTBASCULE_SUPPRIMER')
+
+@enduml

@@ -1,0 +1,53 @@
+@startuml Navigation_Detail
+left to right direction
+
+package "Dashboard" {
+  [Index Principal]
+}
+
+package "Operations" {
+  [Liste Operations]
+  [Form Operation]
+  [Nouveau Interne]
+  [Nouveau Externe]
+}
+
+package "Produits" {
+  [Liste Produits]
+  [Form Produit]
+}
+
+package "Partenaires" {
+  [Liste Partenaires]
+  [Form Partenaire]
+}
+
+package "En Cours" {
+  [Op Internes]
+  [Op Externes]
+  [Form Interne]
+  [Form Externe]
+}
+
+package "Vehicules" {
+  [Vehicules Tarer]
+  [Vehicules Externes]
+  [Form Tarer]
+  [Form Externe V]
+}
+
+[Index Principal] --> [Liste Operations]
+[Index Principal] --> [Liste Produits]
+[Index Principal] --> [Liste Partenaires]
+
+[Liste Operations] --> [Form Operation]
+[Liste Operations] --> [Nouveau Interne]
+[Liste Operations] --> [Nouveau Externe]
+
+[Op Internes] --> [Form Interne]
+[Op Externes] --> [Form Externe]
+
+[Form Interne] --> [Form Operation]
+[Form Externe] --> [Form Operation]
+
+@enduml

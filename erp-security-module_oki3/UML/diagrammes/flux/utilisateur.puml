@@ -1,0 +1,20 @@
+@startuml Flux_Simple
+start
+
+:Dashboard;
+
+if (Operation?) then (Interne)
+  :Vehicule Tarer;
+  :Operation En Cours Interne;
+  :Nouvelle Operation I;
+else (Externe)
+  :Vehicule Externe;
+  :Operation En Cours Externe;
+  :Nouvelle Operation E;
+endif
+
+:Formulaire Operation;
+:Sauvegarder;
+
+stop
+@enduml

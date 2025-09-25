@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Type de Partenaire</title>
+    <link rel="stylesheet" th:href="@{/css/bootstrap.min.css}" />
+</head>
+<body>
+<div class="container mt-4">
+    <div class="card">
+        <div class="card-header bg-primary text-white">
+            <h5 th:text="${typePartenaire.id != null} ? 'Modification du type' : 'Nouveau type'"></h5>
+        </div>
+        <div class="card-body">
+            <form th:action="|@{/pontbascule/type-partenaires}${typePartenaire.id != null ? '/' + typePartenaire.id : ''}|"
+                  th:object="${typePartenaire}" method="post">
+                <div class="mb-3">
+                    <label for="libelle" class="form-label">Libellé</label>
+                    <input type="text" class="form-control" id="libelle" th:field="*{libelle}" required maxlength="50">
+                    <div class="text-danger" th:if="${#fields.hasErrors('libelle')}" th:errors="*{libelle}"></div>
+                </div>
+                <div class="mt-4">
+                    <button type="submit" class="btn btn-primary">Enregistrer</button>
+                    <a th:href="@{/pontbascule/type-partenaires}" class="btn btn-secondary">Annuler</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<script th:src="@{/js/bootstrap.bundle.min.js}"></script>
+</body>
+</html>

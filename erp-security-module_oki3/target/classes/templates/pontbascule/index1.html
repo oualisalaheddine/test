@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestion du Pont Bascule</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container-fluid">
+        <!-- En-tête -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card bg-primary text-white">
+                    <div class="card-body">
+                        <h1 class="card-title mb-0">
+                            <i class="fas fa-weight-scale me-2"></i>
+                            Gestion du Pont Bascule
+                        </h1>
+                        <p class="card-text mb-0">Système de pesage et gestion des opérations</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Navigation par onglets -->
+        <ul class="nav nav-pills mb-3" id="pills-tab" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="pills-dashboard-tab" data-bs-toggle="pill" data-bs-target="#pills-dashboard" type="button" role="tab">
+                    <i class="fas fa-tachometer-alt me-1"></i>Tableau de bord
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="pills-operations-tab" data-bs-toggle="pill" data-bs-target="#pills-operations" type="button" role="tab">
+                    <i class="fas fa-clipboard-list me-1"></i>Opérations
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="pills-operations-cours-tab" data-bs-toggle="pill" data-bs-target="#pills-operations-cours" type="button" role="tab">
+                    <i class="fas fa-hourglass-half me-1"></i>Opérations en cours
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="pills-produits-tab" data-bs-toggle="pill" data-bs-target="#pills-produits" type="button" role="tab">
+                    <i class="fas fa-box me-1"></i>Produits
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="pills-partenaires-tab" data-bs-toggle="pill" data-bs-target="#pills-partenaires" type="button" role="tab">
+                    <i class="fas fa-users me-1"></i>Partenaires
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="pills-vehicules-tab" data-bs-toggle="pill" data-bs-target="#pills-vehicules" type="button" role="tab">
+                    <i class="fas fa-truck me-1"></i>Véhicules
+                </button>
+            </li>
+        </ul>
+
+        <!-- Contenu des onglets -->
+        <div class="tab-content" id="pills-tabContent">
+            
+            <!-- Tableau de bord -->
+            <div class="tab-pane fade show active" id="pills-dashboard" role="tabpanel">
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <div class="card bg-info text-white">
+                            <div class="card-body">
+                                <h5 class="card-title">
+                                    <i class="fas fa-clipboard-list me-2"></i>Opérations
+                                </h5>
+                                <h2 class="mb-0" th:text="${#lists.size(operations)}">0</h2>
+                                <small>Total des opérations</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <div class="card bg-success text-white">
+                            <div class="card-body">
+                                <h5 class="card-title">
+                                    <i class="fas fa-box me-2"></i>Produits
+                                </h5>
+                                <h2 class="mb-0" th:text="${#lists.size(produits)}">0</h2>
+                                <small>Produits référencés</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <div class="card bg-warning text-white">
+                            <div class="card-body">
+                                <h5 class="card-title">
+                                    <i class="fas fa-users me-2"></i>Partenaires
+                                </h5>
+                                <h2 class="mb-0" th:text="${#lists.size(partenaires)}">0</h2>
+                                <small>Partenaires actifs</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Dernières opérations -->
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="fas fa-history me-2"></i>Dernières opérations</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Heure</th>
+                                        <th>Immatriculation</th>
+                                        <th>Produit</th>
+                                        <th>Partenaire</th>
+                                        <th>Poids Net (kg)</th>
+                                        <th>Type</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="operation : ${operations}" th:if="${operationStat.index < 10}">
+                                        <td th:text="${#temporals.format(operation.dateOperation, 'dd/MM/yyyy')}"></td>
+                                        <td th:text="${#temporals.format(operation.heureOperation, 'HH:mm')}"></td>
+                                        <td th:text="${operation.immatriculation}"></td>
+                                        <td th:text="${operation.produit.nom}"></td>
+                                        <td th:text="${operation.partenaire.nom}"></td>
+                                        <td th:text="${operation.poidsNet}"></td>
+                                        <td>
+                                            <span class="badge bg-primary" th:text="${operation.typeOperation.nom}"></span>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Onglet Opérations -->
+            <div class="tab-pane fade" id="pills-operations" role="tabpanel">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0"><i class="fas fa-clipboard-list me-2"></i>Gestion des Opérations</h5>
+                        <a th:href="@{/pontbascule/operations/nouveau}" class="btn btn-primary" sec:authorize="hasAuthority('PONTBASCULE_CREER')">
+                            <i class="fas fa-plus me-1"></i>Nouvelle opération
+                        </a>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-striped table-hover">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Date</th>
+                                        <th>Heure</th>
+                                        <th>Immatriculation</th>
+                                        <th>Produit</th>
+                                        <th>Partenaire</th>
+                                        <th>Type</th>
+                                        <th>Pesée 1</th>
+                                        <th>Pesée 2</th>
+                                        <th>Poids Net</th>
+                                        <th>Qté Déclarée</th>
+                                        <th>Écart</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="operation : ${operations}">
+                                        <td th:text="${operation.id}"></td>
+                                        <td th:text="${#temporals.format(operation.dateOperation, 'dd/MM/yyyy')}"></td>
+                                        <td th:text="${#temporals.format(operation.heureOperation, 'HH:mm')}"></td>
+                                        <td th:text="${operation.immatriculation}"></td>
+                                        <td th:text="${operation.produit.nom}"></td>
+                                        <td th:text="${operation.partenaire.nom}"></td>
+                                        <td>
+                                            <span class="badge bg-info" th:text="${operation.typeOperation.nom}"></span>
+                                        </td>
+                                        <td th:text="${operation.peser1} + ' kg'"></td>
+                                        <td th:text="${operation.peser2} + ' kg'"></td>
+                                        <td>
+                                            <strong th:text="${operation.poidsNet} + ' kg'"></strong>
+                                        </td>
+                                        <td th:text="${operation.qteDeclare} + ' kg'"></td>
+                                        <td>
+                                            <span th:class="${operation.ecart < 0 ? 'text-danger' : (operation.ecart > 0 ? 'text-warning' : 'text-success')}" 
+                                                  th:text="${operation.ecart} + ' kg'"></span>
+                                        </td>
+                                        <td>
+                                            <div class="btn-group" role="group">
+                                                <a th:href="@{/pontbascule/operations/{id}/modifier(id=${operation.id})}" 
+                                                   class="btn btn-sm btn-outline-primary" 
+                                                   sec:authorize="hasAuthority('PONTBASCULE_MODIFIER')">
+                                                    <i class="fas fa-edit"></i>
+                                                </a>
+                                                <form th:action="@{/pontbascule/operations/{id}/supprimer(id=${operation.id})}" 
+                                                      method="post" style="display: inline;"
+                                                      sec:authorize="hasAuthority('PONTBASCULE_SUPPRIMER')">
+                                                    <button type="submit" class="btn btn-sm btn-outline-danger" 
+                                                            onclick="return confirm('Êtes-vous sûr de vouloir supprimer cette opération ?')">
+                                                        <i class="fas fa-trash"></i>
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Onglet Opérations en cours -->
+            <div class="tab-pane fade" id="pills-operations-cours" role="tabpanel">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <h5 class="mb-0"><i class="fas fa-truck me-2"></i>Opérations Internes</h5>
+                                <a th:href="@{/pontbascule/operations-internes/nouveau}" class="btn btn-success btn-sm" sec:authorize="hasAuthority('PONTBASCULE_CREER')">
+                                    <i class="fas fa-plus me-1"></i>Nouveau
+                                </a>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table table-sm">
+                                        <thead>
+                                            <tr>
+                                                <th>ID</th>
+                                                <th>Véhicule</th>
+                                                <th>Pesée 1</th>
+                                                <th>Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <!-- Les données seront chargées via AJAX ou ajoutées au modèle -->
+                                            <tr>
+                                                <td colspan="4" class="text-center text-muted">Aucune opération interne en cours</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <h5 class="mb-0"><i class="fas fa-shipping-fast me-2"></i>Opérations Externes</h5>
+                                <a th:href="@{/pontbascule/operations-externes/nouveau}" class="btn btn-warning btn-sm" sec:authorize="hasAuthority('PONTBASCULE_CREER')">
+                                    <i class="fas fa-plus me-1"></i>Nouveau
+                                </a>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table table-sm">
+                                        <thead>
+                                            <tr>
+                                                <th>ID</th>
+                                                <th>Véhicule</th>
+                                                <th>Pesée 1</th>
+                                                <th>Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <!-- Les données seront chargées via AJAX ou ajoutées au modèle -->
+                                            <tr>
+                                                <td colspan="4" class="text-center text-muted">Aucune opération externe en cours</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-3">
+                    <a th:href="@{/pontbascule/operations-internes}" class="btn btn-primary">
+                        <i class="fas fa-list me-1"></i>Voir toutes les opérations en cours
+                    </a>
+                </div>
+            </div>
+
+            <!-- Onglet Produits -->
+            <div class="tab-pane fade" id="pills-produits" role="tabpanel">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0"><i class="fas fa-box me-2"></i>Gestion des Produits</h5>
+                        <a th:href="@{/pontbascule/produits/nouveau}" class="btn btn-success" sec:authorize="hasAuthority('PONTBASCULE_CREER')">
+                            <i class="fas fa-plus me-1"></i>Nouveau produit
+                        </a>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-12 mb-3">
+                                <a th:href="@{/pontbascule/produits}" class="btn btn-outline-primary">
+                                    <i class="fas fa-list me-1"></i>Voir tous les produits
+                                </a>
+                            </div>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table table-striped table-hover">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Nom</th>
+                                       <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="produit : ${produits}">
+                                        <td th:text="${produit.idProduit}"></td>
+                                        <td th:text="${produit.designationProduit}"></td>
+                                        <td>
+                                            <div class="btn-group" role="group">
+                                                <a th:href="@{/pontbascule/produits/{id}/modifier(id=${produit.idProduit})}" 
+                                                   class="btn btn-sm btn-outline-primary"
+                                                   sec:authorize="hasAuthority('PONTBASCULE_MODIFIER')">
+                                                    <i class="fas fa-edit"></i>
+                                                </a>
+                                                <form th:action="@{/pontbascule/produits/{id}/supprimer(id=${produit.idProduit})}" 
+                                                      method="post" style="display: inline;"
+                                                      sec:authorize="hasAuthority('PONTBASCULE_SUPPRIMER')">
+                                                    <button type="submit" class="btn btn-sm btn-outline-danger" 
+                                                            onclick="return confirm('Êtes-vous sûr de vouloir supprimer ce produit ?')">
+                                                        <i class="fas fa-trash"></i>
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Onglet Partenaires -->
+            <div class="tab-pane fade" id="pills-partenaires" role="tabpanel">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0"><i class="fas fa-users me-2"></i>Gestion des Partenaires</h5>
+                        <div>
+                            <a th:href="@{/pontbascule/type-partenaires}" class="btn btn-info me-2">
+                                <i class="fas fa-tags me-1"></i>Types de partenaires
+                            </a>
+                            <a th:href="@{/pontbascule/partenaires/nouveau}" class="btn btn-success" sec:authorize="hasAuthority('PONTBASCULE_CREER')">
+                                <i class="fas fa-plus me-1"></i>Nouveau partenaire
+                            </a>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-striped table-hover">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Raison Sociale</th>
+                                       <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="partenaire : ${partenaires}">
+                                        <td th:text="${partenaire.id}"></td>
+                                        <td th:text="${partenaire.raisonSociale}"></td>
+                                        <td>
+                                            <span class="badge bg-secondary" th:text="${partenaire.typePartenaire?.libelle}"></span>
+                                        </td>
+                                       <td>
+                                            <div class="btn-group" role="group">
+                                                <a th:href="@{/pontbascule/partenaires/{id}/modifier(id=${partenaire.id})}" 
+                                                   class="btn btn-sm btn-outline-primary"
+                                                   sec:authorize="hasAuthority('PONTBASCULE_MODIFIER')">
+                                                    <i class="fas fa-edit"></i>
+                                                </a>
+                                                <form th:action="@{/pontbascule/partenaires/{id}/supprimer(id=${partenaire.id})}" 
+                                                      method="post" style="display: inline;"
+                                                      sec:authorize="hasAuthority('PONTBASCULE_SUPPRIMER')">
+                                                    <button type="submit" class="btn btn-sm btn-outline-danger" 
+                                                            onclick="return confirm('Êtes-vous sûr de vouloir supprimer ce partenaire ?')">
+                                                        <i class="fas fa-trash"></i>
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Onglet Véhicules -->
+            <div class="tab-pane fade" id="pills-vehicules" role="tabpanel">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0"><i class="fas fa-truck me-2"></i>Gestion des Véhicules</h5>
+                        <a th:href="@{/pontbascule/vehicules-tarer/nouveau}" class="btn btn-success" sec:authorize="hasAuthority('PONTBASCULE_CREER')">
+                            <i class="fas fa-plus me-1"></i>Nouveau véhicule
+                        </a>
+                    </div>
+                    <div class="card-body">
+                        <div class="row mb-3">
+                            <div class="col-md-12">
+                                <a th:href="@{/pontbascule/vehicules-tarer}" class="btn btn-outline-primary">
+                                    <i class="fas fa-list me-1"></i>Voir tous les véhicules
+                                </a>
+                            </div>
+                        </div>
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle me-2"></i>
+                            Les véhicules sont utilisés pour les opérations de pesage. Chaque véhicule a une tare spécifique.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts Bootstrap -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Script pour améliorer l'UX -->
+    <script>
+        // Auto-refresh pour les opérations en cours (optionnel)
+        document.addEventListener('DOMContentLoaded', function() {
+            // Confirmation pour les suppressions
+            const deleteButtons = document.querySelectorAll('button[onclick*="confirm"]');
+            deleteButtons.forEach(button => {
+                button.addEventListener('click', function(e) {
+                    if (!confirm('Êtes-vous sûr de vouloir effectuer cette suppression ?')) {
+                        e.preventDefault();
+                    }
+                });
+            });
+
+            // Messages de succès/erreur (si vous utilisez des messages flash)
+            const alerts = document.querySelectorAll('.alert-dismissible');
+            alerts.forEach(alert => {
+                setTimeout(() => {
+                    alert.style.display = 'none';
+                }, 5000);
+            });
+        });
+    </script>
+</body>
+</html>
