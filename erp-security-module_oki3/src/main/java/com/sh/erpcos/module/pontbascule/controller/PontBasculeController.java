@@ -158,6 +158,7 @@ public class PontBasculeController {
 		model.addAttribute("produits", produitService.findAll());
 		model.addAttribute("partenaires", partenaireService.findAll());
 		model.addAttribute("operations", operationService.findAll());
+		model.addAttribute("typesOperations", typeOperationService.findAll());
 		return "pontbascule/operations/index";
 	}
 	@GetMapping("/operations/nouveauI")

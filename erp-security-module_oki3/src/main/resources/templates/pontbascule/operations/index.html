@@ -1,54 +1,618 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="UTF-8" />
-    <title>Opération</title>
+<meta charset="UTF-8" />
+<title>Gestion des Opérations - Pont Bascule</title>
+<link
+	href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css"
+	rel="stylesheet">
+<link
+	href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css"
+	rel="stylesheet">
+<link
+	href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css"
+	rel="stylesheet" />
+<link
+	href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css"
+	rel="stylesheet" />
+
+<style>
+.card {
+	box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+	border: none;
+	border-radius: 12px;
+}
+
+.filter-card {
+	background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+	color: white;
+}
+
+.table-container {
+	max-height: 600px;
+	overflow-y: auto;
+	border-radius: 8px;
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.table thead th {
+	position: sticky;
+	top: 0;
+	background: #495057;
+	color: white;
+	border: none;
+	font-weight: 600;
+	font-size: 0.85rem;
+	z-index: 10;
+}
+
+.table tbody tr:hover {
+	background-color: #f8f9fa;
+	transform: scale(1.01);
+	transition: all 0.2s ease;
+}
+
+.btn-action {
+	padding: 0.25rem 0.5rem;
+	font-size: 0.75rem;
+	margin: 0.1rem;
+}
+
+.search-box {
+	border-radius: 25px;
+	border: 2px solid #e9ecef;
+	padding: 0.75rem 1.25rem;
+	font-size: 1rem;
+}
+
+.search-box:focus {
+	border-color: #667eea;
+	box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+}
+
+.stats-card {
+	background: linear-gradient(45deg, #28a745, #20c997);
+	color: white;
+	border-radius: 10px;
+}
+
+.filter-badge {
+	background: rgba(255, 255, 255, 0.2);
+	color: white;
+	border-radius: 15px;
+	padding: 0.25rem 0.75rem;
+	margin: 0.25rem;
+	display: inline-block;
+}
+
+.operation-cancelled {
+	background-color: #f8d7da !important;
+	opacity: 0.7;
+}
+
+.ecart-danger {
+	color: #dc3545 !important;
+	font-weight: bold;
+}
+
+.ecart-warning {
+	color: #fd7e14 !important;
+	font-weight: bold;
+}
+
+.ecart-success {
+	color: #198754 !important;
+}
+</style>
 </head>
-<body>
+<body class="bg-light">
+	<div class="container-fluid py-4">
+
+		<!-- Header -->
+		<div class="row mb-4">
+			<div class="col-12">
+				<div class="d-flex justify-content-between align-items-center">
+					<div>
+						<h1 class="h3 mb-1">
+							<i class="bi bi-clipboard-data"></i> Gestion des Opérations
+						</h1>
+						<p class="text-muted mb-0">Pont Bascule - Suivi et contrôle</p>
+					</div>
+					<div>
+						<a href="/pontbascule/operations/nouveauI" class="btn btn-primary">
+							<i class="bi bi-plus-circle"></i> Nouvelle Opération Interne
+						</a> <a href="/pontbascule/operations/nouveauE"
+							class="btn btn-success"> <i class="bi bi-plus-circle"></i>
+							Nouvelle Opération Externe
+						</a>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- Statistiques rapides -->
+		<div class="row mb-4">
+			<div class="col-md-3">
+				<div class="card stats-card">
+					<div class="card-body text-center">
+						<h4 class="mb-0" id="total-operations">0</h4>
+						<small>Total Opérations</small>
+					</div>
+				</div>
+			</div>
+			<div class="col-md-3">
+				<div class="card stats-card">
+					<div class="card-body text-center">
+						<h4 class="mb-0" id="total-poids">0 T</h4>
+						<small>Poids Total</small>
+					</div>
+				</div>
+			</div>
+			<div class="col-md-3">
+				<div class="card stats-card">
+					<div class="card-body text-center">
+						<h4 class="mb-0" id="operations-today">0</h4>
+						<small>Aujourd'hui</small>
+					</div>
+				</div>
+			</div>
+			<div class="col-md-3">
+				<div class="card stats-card">
+					<div class="card-body text-center">
+						<h4 class="mb-0" id="avg-ecart">0%</h4>
+						<small>Écart Total</small>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- Filtres -->
+<div class="card filter-card mb-4">
+    <div class="card-body">
+        <h5 class="card-title mb-3">
+            <i class="bi bi-funnel"></i> Filtres de Recherche
+        </h5>
+
+        <!-- SECTION 1: Filtres principaux -->
+        <div class="row g-3 mb-4">
+        
+            <!-- Filtre Produit -->
+            <div class="col-md-3">
+                <label class="form-label">Produit</label>
+                <select id="filter-produit" class="form-select text-dark">
+                    <option value="">Tous les produits</option>
+                    <option th:each="p : ${produits}"
+                            th:value="${p.designationProduit}"
+                            th:text="${p.designationProduit}"></option>
+                </select>
+            </div>
+
+            <!-- Filtre Partenaire -->
+            <div class="col-md-3">
+                <label class="form-label">Partenaire</label>
+                <select id="filter-partenaire" class="form-select text-dark">
+                    <option value="">Tous les partenaires</option>
+                    <option th:each="pt : ${partenaires}"
+                            th:value="${pt.raisonSociale}" 
+                            th:text="${pt.raisonSociale}"></option>
+                </select>
+            </div>
+
+            <!-- Filtre Type d'opération -->
+            <div class="col-md-3">
+                <label class="form-label">Type d'opération</label>
+                <select id="filter-type-operation" class="form-select text-dark" multiple>
+                    <option th:each="type : ${typesOperations}"
+                            th:value="${type.libelle}" 
+                            th:text="${type.libelle}"></option>
+                </select>
+            </div>
+
+            <!-- Placeholder pour aligner la grille -->
+            <div class="col-md-3"></div>
+
+            <!-- Filtre Date Début -->
+            <div class="col-md-3">
+                <label class="form-label">Date début</label>
+                <input type="date" id="filter-date-debut" class="form-control">
+            </div>
+
+            <!-- Filtre Date Fin -->
+            <div class="col-md-3">
+                <label class="form-label">Date fin</label>
+                <input type="date" id="filter-date-fin" class="form-control">
+            </div>
+        </div>
 
 
+        <!-- SECTION 2: Recherche et actions -->
+        <div class="row g-3">
+            <!-- Recherche globale -->
+            <div class="col-md-6">
+                <label class="form-label">Recherche globale</label>
+                <div class="input-group">
+                    <span class="input-group-text bg-white">
+                        <i class="bi bi-search"></i>
+                    </span>
+                    <input type="text" id="global-search"
+                           class="form-control search-box"
+                           placeholder="Rechercher dans toutes les colonnes...">
+                </div>
+            </div>
 
-<h2>Opérations</h2>
+            <!-- Boutons actions -->
+            <div class="col-md-6 d-flex align-items-end">
+                <button type="button" id="apply-filters" class="btn btn-light me-2">
+                    <i class="bi bi-check-circle"></i> Appliquer
+                </button>
+                <button type="button" id="reset-filters" class="btn btn-outline-light">
+                    <i class="bi bi-arrow-clockwise"></i> Réinitialiser
+                </button>
+            </div>
+        </div>
 
-<table border="1">
-    <tr>
-        <th>ID</th><th>Date</th><th>Heure</th><th>Produit</th><th>Partenaire</th>
-        <th>Type</th><th>Immat</th><th>P1</th><th>P2</th><th>Net</th><th>Qté</th><th>Écart</th>
-        <th>factureNumero</th>
-        <th>dateFacture</th>
-        <th>commentaire</th>
-        <th>cree Par</th>
-        <th>annuler Par</th>
-        <th>date Annulation</th>
-        <th>Actions</th>
-    </tr>
-    <tr th:each="op : ${operations}">
-        <td th:text="${op.id}"></td>
-        <td th:text="${op.dateOperation}"></td>
-        <td th:text="${op.heureOperation}"></td>
-        <td th:text="${op.produit != null ? op.produit.designationProduit : ''}"></td>
-        <td th:text="${op.partenaire != null ? op.partenaire.raisonSociale : ''}"></td>
-        <td th:text="${op.typeOperation != null ? op.typeOperation.libelle : ''}"></td>
-        <td th:text="${op.immatriculation}"></td>
-        <td th:text="${op.peser1}"></td>
-        <td th:text="${op.peser2}"></td>
-        <td th:text="${op.poidsNet}"></td>
-        <td th:text="${op.qteDeclare}"></td>
-        <td th:text="${op.ecart}"></td>
-        <td th:text="${op.factureNumero}"></td>
-        <td th:text="${op.dateFacture}"></td>
-        <td th:text="${op.commentaire}"></td>
-        <td th:text="${op.creeParId}"></td>
-        <td th:text="${op.annulerPar}"></td>
-        <td th:text="${op.dateAnnulation}"></td>
-      <td>
-            <a th:href="@{'/pontbascule/operations/' + ${op.id}  +'/modifier'}">Modifier</a>
-           
-        </td>
-    </tr>
-    </table>
+        <!-- Filtres actifs -->
+        <div id="active-filters" class="mt-3"></div>
+    </div>
+</div>
 
+		<!-- Tableau des opérations -->
+		<div class="card">
+			<div class="card-header bg-white border-0">
+				<div class="d-flex justify-content-between align-items-center">
+					<h5 class="mb-0">Liste des Opérations</h5>
+					<div>
+						<span class="badge bg-primary" id="filtered-count">0
+							résultats</span>
+						<button class="btn btn-outline-primary btn-sm"
+							onclick="exportToExcel()">
+							<i class="bi bi-download"></i> Exporter
+						</button>
+					</div>
+				</div>
+			</div>
+
+			<div class="card-body p-0">
+				<div class="table-container">
+					<table class="table table-hover table-sm mb-0"
+						id="operations-table">
+						<thead>
+							<tr>
+								<th style="width: 60px;">#</th>
+								<th style="width: 100px;">Date</th>
+								<th style="width: 80px;">Heure</th>
+								<th style="width: 150px;">Produit</th>
+								<th style="width: 180px;">Partenaire</th>
+								<th style="width: 120px;">Type</th>
+								<th style="width: 100px;">Immat.</th>
+								<th style="width: 80px;">P1 (kg)</th>
+								<th style="width: 80px;">P2 (kg)</th>
+								<th style="width: 80px;">Net (kg)</th>
+								<th style="width: 80px;">Qté</th>
+								<th style="width: 80px;">Écart (kg)</th>
+								<th style="width: 100px;">N° Fact.</th>
+								<th style="width: 100px;">Date Fact.</th>
+								<th style="width: 150px;">Commentaire</th>
+								<th style="width: 100px;">Créé par</th>
+								<th style="width: 100px;">Modifier par</th>
+								<th style="width: 100px;">Date Mod.</th>
+								<th style="width: 100px;">Actions</th>
+							</tr>
+						</thead>
+						<tbody id="operations-tbody">
+							<tr th:each="op : ${operations}" class="operation-row"
+								th:classappend="${op.annulerPar != null} ? 'operation-cancelled' : ''">
+								<td><span class="badge"
+									th:classappend="${op.annulerPar != null} ? 'bg-danger' : 'bg-secondary'"
+									th:text="${op.id}"></span></td>
+								<td
+									th:text="${#temporals.format(op.dateOperation, 'dd/MM/yyyy')}"></td>
+								<td th:text="${#temporals.format(op.heureOperation, 'HH:mm')}"></td>
+								<td><span class="badge bg-info text-dark"
+									th:text="${op.produit != null ? op.produit.designationProduit : '-'}"></span>
+								</td>
+								<td
+									th:text="${op.partenaire != null ? op.partenaire.raisonSociale : '-'}"></td>
+								<td><span class="badge bg-warning text-dark"
+									th:text="${op.typeOperation != null ? op.typeOperation.libelle : '-'}"></span>
+								</td>
+								<td><code th:text="${op.immatriculation}"></code></td>
+								<td class="text-end"
+									th:text="${#numbers.formatDecimal(op.peser1,0, 'WHITESPACE', 0, 'WHITESPACE')}"></td>
+								<td class="text-end"
+									th:text="${#numbers.formatDecimal(op.peser2, 0, 'WHITESPACE', 0, 'WHITESPACE')}"></td>
+								<td class="text-end fw-bold"
+									th:text="${#numbers.formatDecimal(op.poidsNet, 0, 0)}"></td>
+								<td class="text-end"
+									th:text="${#numbers.formatDecimal(op.qteDeclare, 0, 2)}"></td>
+								<td class="text-end"
+									th:classappend="${op.ecart != null ? (op.ecart > 50 ? 'ecart-danger' : (op.ecart < -50 ? 'ecart-warning' : 'ecart-success')) : ''}"
+									th:text="${op.ecart != null ? #numbers.formatDecimal(op.ecart, 0, 0) : '0'}"></td>
+								<td th:text="${op.factureNumero ?: '-'}"></td>
+								<td
+									th:text="${op.dateFacture != null ? #temporals.format(op.dateFacture, 'dd/MM/yyyy') : '-'}"></td>
+								<td><span th:if="${op.commentaire}"
+									th:text="${#strings.abbreviate(op.commentaire, 20)}"
+									th:title="${op.commentaire}" data-bs-toggle="tooltip"></span> <span
+									th:unless="${op.commentaire}">-</span></td>
+								<td th:text="${op.creeParId ?: '-'}"></td>
+								<td th:text="${op.annulerPar ?: '-'}"></td>
+								<td
+									th:text="${op.dateAnnulation != null ? #temporals.format(op.dateAnnulation, 'dd/MM/yyyy') : '-'}"></td>
+								<td>
+									<div class="btn-group" role="group">
+										<a
+											th:href="@{'/pontbascule/operations/' + ${op.id} + '/modifier'}"
+											class="btn btn-outline-primary btn-action"
+											data-bs-toggle="tooltip" title="Modifier"> <i
+											class="bi bi-pencil"></i>
+										</a>
+										<button class="btn btn-outline-info btn-action btn-details"
+											data-bs-toggle="tooltip" title="Détails"
+											th:data-operation-id="${op.id}">
+											<i class="bi bi-eye"></i>
+										</button>
+									</div>
+								</td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+			</div>
+		</div>
+
+		<!-- Message si aucun résultat -->
+		<div id="no-results" class="text-center py-5" style="display: none;">
+			<i class="bi bi-search display-1 text-muted"></i>
+			<h4 class="text-muted mt-3">Aucun résultat trouvé</h4>
+			<p class="text-muted">Modifiez vos critères de recherche</p>
+		</div>
+	</div>
+
+	<!-- Scripts -->
+	<script
+		src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+	<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+	<script
+		src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+	<script>
+    $(document).ready(function() {
+        // Initialisation Select2
+        $('#filter-produit, #filter-partenaire').select2({
+    theme: 'bootstrap-5',
+    allowClear: true,
+    width: '100%'
+});
+
+// Select2 multi-sélection pour type d'opération
+$('#filter-type-operation').select2({
+    theme: 'bootstrap-5',
+    allowClear: true,
+    width: '100%',
+    placeholder: 'Tous les types',
+    closeOnSelect: false
+});
+
+        // Calcul des statistiques
+        updateStats();
+
+        // Initialisation des tooltips
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+
+        // Event listeners pour les boutons d'action
+        $(document).on('click', '.btn-details', function() {
+            const operationId = $(this).data('operation-id');
+            showDetails(operationId);
+        });
+
+        // Filtrage en temps réel
+        $('#global-search').on('keyup', function() {
+            applyFilters();
+        });
+<!-- 
+        $('#filter-produit, #filter-partenaire, #filter-date-debut, #filter-date-fin').on('change', function() {
+            applyFilters();
+        });
+-->
+$('#filter-produit, #filter-partenaire, #filter-type-operation, #filter-date-debut, #filter-date-fin').on('change', function() {
+    applyFilters();
+});
+
+        $('#apply-filters').on('click', applyFilters);
+        $('#reset-filters').on('click', resetFilters);
+    });
+
+    function applyFilters() {
+        const globalSearch = $('#global-search').val().toLowerCase();
+        const produitFilter = $('#filter-produit').val();
+        const partenaireFilter = $('#filter-partenaire').val();
+        const typeOperationFilter = $('#filter-type-operation').val();
+        const dateDebut = $('#filter-date-debut').val();
+        const dateFin = $('#filter-date-fin').val();
+        
+        let visibleCount = 0;
+
+        $('.operation-row').each(function() {
+            const row = $(this);
+            let visible = true;
+
+            // Filtre global
+            if (globalSearch) {
+                const rowText = row.text().toLowerCase();
+                if (!rowText.includes(globalSearch)) {
+                    visible = false;
+                }
+            }
+
+            // Filtre produit
+            if (produitFilter && visible) {
+                const produit = row.find('td:nth-child(4)').text().trim();
+                if (produit !== produitFilter) {
+                    visible = false;
+                }
+            }
+
+            // Filtre partenaire
+            if (partenaireFilter && visible) {
+                const partenaire = row.find('td:nth-child(5)').text().trim();
+                if (partenaire !== partenaireFilter) {
+                    visible = false;
+                }
+            }
+            
+         // Filtre type d'opération (multi-sélection)
+            if (typeOperationFilter && typeOperationFilter.length > 0 && visible) {
+                const typeOperation = row.find('td:nth-child(6)').text().trim();
+                if (!typeOperationFilter.includes(typeOperation)) {
+                    visible = false;
+                }
+            }
+
+            // Filtre dates
+            if ((dateDebut || dateFin) && visible) {
+                const dateOp = row.find('td:nth-child(2)').text();
+                const dateOpFormatted = convertToISO(dateOp);
+                
+                if (dateDebut && dateOpFormatted < dateDebut) {
+                    visible = false;
+                }
+                if (dateFin && dateOpFormatted > dateFin) {
+                    visible = false;
+                }
+            }
+
+            if (visible) {
+                row.show();
+                visibleCount++;
+            } else {
+                row.hide();
+            }
+        });
+
+        // Mettre à jour le compteur
+        $('#filtered-count').text(visibleCount + ' résultat' + (visibleCount > 1 ? 's' : ''));
+
+        // Afficher/masquer le message "aucun résultat"
+        if (visibleCount === 0) {
+            $('#no-results').show();
+            $('.table-container').hide();
+        } else {
+            $('#no-results').hide();
+            $('.table-container').show();
+        }
+
+        // Mettre à jour les statistiques
+        updateStats();
+        updateActiveFilters();
+    }
+
+    function resetFilters() {
+        $('#global-search').val('');
+        $('#filter-produit').val('').trigger('change');
+        $('#filter-partenaire').val('').trigger('change');
+        $('#filter-type-operation').val([]).trigger('change');
+        $('#filter-date-debut').val('');
+        $('#filter-date-fin').val('');
+        
+        $('.operation-row').show();
+        $('#no-results').hide();
+        $('.table-container').show();
+        
+        updateStats();
+        $('#active-filters').empty();
+    }
+
+    function updateActiveFilters() {
+        const container = $('#active-filters');
+        container.empty();
+        
+        const filters = [];
+        
+        if ($('#global-search').val()) {
+            filters.push('Recherche: ' + $('#global-search').val());
+        }
+        if ($('#filter-produit').val()) {
+            filters.push('Produit: ' + $('#filter-produit').val());
+        }
+        if ($('#filter-partenaire').val()) {
+            filters.push('Partenaire: ' + $('#filter-partenaire').val());
+        }
+        //Type d'opération
+    if ($('#filter-type-operation').val() && $('#filter-type-operation').val().length > 0) {
+        const types = $('#filter-type-operation').val();
+        filters.push('Types: ' + types.join(', '));
+    }
+        
+        
+        if ($('#filter-date-debut').val()) {
+            filters.push('Depuis: ' + $('#filter-date-debut').val());
+        }
+        if ($('#filter-date-fin').val()) {
+            filters.push('Jusqu\'à: ' + $('#filter-date-fin').val());
+        }
+        
+        filters.forEach(filter => {
+            container.append('<span class="filter-badge">' + filter + '</span>');
+        });
+    }
+
+    function updateStats() {
+        const visibleRows = $('.operation-row:visible');
+        const totalOps = visibleRows.length;
+        let totalPoids = 0;
+        let totalEcartKg = 0; // Changement: écart total en kg
+        let opsToday = 0;
+        
+        const today = new Date().toISOString().split('T')[0];
+        
+        visibleRows.each(function() {
+            const poids = parseFloat($(this).find('td:nth-child(10)').text().replace(/\s/g, '').replace(',', '.')) || 0;
+            totalPoids += poids;
+            
+            // Nouveau calcul: écart en kg = (écart% * poids) / 100
+           const ecartKg = parseFloat($(this).find('td:nth-child(12)').text().replace(/\s/g, '')) || 0;
+totalEcartKg += Math.abs(ecartKg);
+            
+            const dateOp = convertToISO($(this).find('td:nth-child(2)').text());
+            if (dateOp === today) {
+                opsToday++;
+            }
+        });
+        
+        $('#total-operations').text(totalOps);
+        $('#total-poids').text((totalPoids/1000).toFixed(3) + ' T');
+        $('#operations-today').text(opsToday);
+        // Changement: affichage en kg avec formatage
+        $('#avg-ecart').text(totalEcartKg > 1000 ? 
+            (totalEcartKg/1000).toFixed(3) + ' T' : 
+            totalEcartKg.toFixed(0) + ' kg');
+        $('#filtered-count').text(totalOps + ' résultat' + (totalOps > 1 ? 's' : ''));
+    }
+
+    function convertToISO(dateStr) {
+        // Convertit dd/MM/yyyy en yyyy-MM-dd
+        const parts = dateStr.split('/');
+        if (parts.length === 3) {
+            return parts[2] + '-' + parts[1] + '-' + parts[0];
+        }
+        return dateStr;
+    }
+
+    function showDetails(id) {
+        // Redirection vers une page de détails ou ouverture d'une modal
+        window.location.href = '/pontbascule/operations/' + id + '/details';
+    }
+
+    function exportToExcel() {
+        // Implémentation de l'export Excel
+        const table = document.getElementById('operations-table');
+        const workbook = XLSX.utils.table_to_book(table, {sheet: "Opérations"});
+        XLSX.writeFile(workbook, 'operations_' + new Date().toISOString().split('T')[0] + '.xlsx');
+    }
+    </script>
 </body>
 </html>
-
-

@@ -1,6 +1,6 @@
 package com.sh.erpcos.module.pontbascule.service;
 
-import com.sh.erpcos.module.pontbascule.entity.Partenaire;
+
 import com.sh.erpcos.module.pontbascule.entity.TypeOperation;
 import com.sh.erpcos.module.pontbascule.repository.TypeOperationRepository;
 import lombok.RequiredArgsConstructor;
